@@ -1,0 +1,21 @@
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+.DS_Store
+.vite
+playwright-report
+test-results
+
+# one-off analysis scripts (reference scratchpad paths)
+scripts/
+
+# Real reviewer/paper/match data (contains names/PII) — never commit or publish.
+# The app ships only synthetic demo data in public/sample/.
+/Other reviewer assignments/
+/2026 AERA Div C 2b Reviewer Assignments - Checks.csv
+/2026 volunteers_by_role_report.xls
+/2026_example - extended_publication_submitter_report.xls
+*.xls
+*.xlsx

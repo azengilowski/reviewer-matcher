@@ -1,0 +1,153 @@
+import { useMemo } from 'react'
+import { downloadText } from '../io/download'
+import { exportResultsCsv } from '../io/exportResults'
+import { exportReportCsv } from '../io/reportExport'
+import { useApp } from '../state/AppStore'
+import { BoardView } from './BoardView'
+import { ScreenShell } from './ScreenShell'
+
+export function MatchScreen() {
+  const { reviewers, papers, settings, run, assignments, lockedPapers, status, error, progress, runMatching } =
+    useApp()
+  const canRun = reviewers.length > 0 && papers.length > 0 && status !== 'running'
+
+  // Re-running replaces assignments on unlocked papers; warn if that discards edits.
+  function onRun() {
+    const unlockedManualEdits = assignments.filter(
+      (a) => a.source === 'manual' && !lockedPapers.includes(a.paperId),
+    ).length
+    if (run && unlockedManualEdits > 0) {
+      const ok = window.confirm(
+        `Re-running replaces assignments on unlocked papers, discarding ${unlockedManualEdits} manual edit(s). ` +
+          `Locked papers are kept. Continue?`,
+      )
+      if (!ok) return
+    }
+    void runMatching()
+  }
+  const stale = run != null && JSON.stringify(run.settings) !== JSON.stringify(settings)
+
+  const stats = useMemo(() => {
+    const assignedPapers = new Set(assignments.map((a) => a.paperId))
+    const assignedReviewers = new Set(assignments.map((a) => a.reviewerId))
+    return {
+      count: assignments.length,
+      unfilledPapers: papers.filter((p) => !assignedPapers.has(p.id)).length,
+      idleReviewers: reviewers.filter((r) => !assignedReviewers.has(r.id)).length,
+      manual: assignments.filter((a) => a.source === 'manual').length,
+    }
+  }, [assignments, papers, reviewers])
+
+  function onExport() {
+    downloadText('reviewer-assignments.csv', exportResultsCsv(assignments, papers, reviewers))
+  }
+  function onExportReport() {
+    if (!run) return
+    downloadText('reviewer-match-report.csv', exportReportCsv(run, assignments, reviewers, papers, settings))
+  }
+
+  return (
+    <ScreenShell
+      title="Match"
+      intro="Run the match, then drag reviewers to fine-tune. Assignments update live."
+    >
+      <p className="match-summary">
+        {reviewers.length} reviewers · {papers.length} papers
+      </p>
+
+      <div className="match-actions">
+        <button
+          className="btn"
+          onClick={onRun}
+          disabled={!canRun}
+          title={
+            run
+              ? 'Re-run the match with current settings (locked papers are preserved)'
+              : 'Run the match using the current settings'
+          }
+        >
+          {status === 'running' ? 'Running…' : run ? 'Re-run match' : 'Run match'}
+        </button>
+        {run && (
+          <button
+            className="btn btn--ghost"
+            onClick={onExport}
+            title="Download assignments as CSV (one column per paper, reviewer names in rows)"
+          >
+            Export results CSV
+          </button>
+        )}
+        {run && (
+          <button
+            className="btn btn--ghost"
+            onClick={onExportReport}
+            title="Download a per-paper report: every ranked reviewer, similarity score, and outcome"
+          >
+            Export report CSV
+          </button>
+        )}
+      </div>
+
+      {status === 'running' && progress && (
+        <div className="match-progress">
+          <div className="match-progress__label">
+            {progress.phase === 'download'
+              ? progress.total > 0
+                ? `Downloading matching model… ${Math.round((progress.loaded / progress.total) * 100)}% (one-time, then cached)`
+                : 'Loading matching model (first run downloads once, then cached)…'
+              : `Embedding & matching… ${progress.loaded}/${progress.total}`}
+          </div>
+          <div className="progressbar">
+            <div
+              className="progressbar__fill"
+              style={{
+                width: `${progress.total > 0 ? Math.round((progress.loaded / progress.total) * 100) : 5}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+      {status === 'error' && <p className="match-error">⚠️ {error}</p>}
+      {stale && status !== 'running' && (
+        <p className="match-stale">⚠️ Settings changed since this match. Re-run to apply them.</p>
+      )}
+
+      {run && (
+        <>
+          <div className="match-stats">
+            <span
+              className={run.stable ? 'badge badge--ok' : 'badge badge--warn'}
+              title={
+                run.stable
+                  ? 'Stable: no paper and reviewer both prefer each other over their current match'
+                  : 'Not stable: a paper and reviewer would both rather be matched together'
+              }
+            >
+              {run.stable ? 'Stable ✓' : 'Not stable'}
+            </span>
+            <span className="badge" title="Total reviewer–paper assignments">
+              {stats.count} assignments
+            </span>
+            {stats.manual > 0 && (
+              <span className="badge" title="Assignments you changed by hand (drag, add, or remove)">
+                {stats.manual} manual
+              </span>
+            )}
+            {stats.unfilledPapers > 0 && (
+              <span className="badge badge--warn" title="Papers with fewer reviewers than their capacity">
+                {stats.unfilledPapers} papers unfilled
+              </span>
+            )}
+            {stats.idleReviewers > 0 && (
+              <span className="badge" title="Reviewers with no assigned papers">
+                {stats.idleReviewers} reviewers idle
+              </span>
+            )}
+          </div>
+
+          <BoardView run={run} />
+        </>
+      )}
+    </ScreenShell>
+  )
+}
