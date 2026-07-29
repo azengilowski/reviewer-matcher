@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import {
   buildPapers,
   buildReviewers,
@@ -72,18 +70,21 @@ describe('messy real-world parsing', () => {
     expect(rows[0][2]).toBe('Qualitative')
   })
 
-  it('imports the real headerless papers_FINAL.csv (BOM + embedded newlines)', () => {
-    const path = resolve(
-      process.cwd(),
-      'Other reviewer assignments/20250812_papers_FINAL.csv',
-    )
-    const rows = parseDelimited(readFileSync(path, 'utf8'))
-    // Headerless, numeric ids in column 0.
+  it('imports a headerless, BOM-prefixed CSV with embedded newlines (real-world shape)', () => {
+    // Mirrors the messy export format: BOM, no header row, numeric ids, and
+    // abstract/keyword cells that contain literal newlines inside quotes.
+    const csv =
+      '﻿' +
+      '2267001,Data and Learning,"An abstract that spans\nmultiple lines","topic one\ntopic two",Qualitative\n' +
+      '2267002,Another Study,"A second abstract","kw",Quantitative\n'
+    const rows = parseDelimited(csv)
     expect(looksLikeHeader(rows, PAPER_FIELDS)).toBe(false)
     const mapping = guessMapping(PAPER_FIELDS, tableHeaders(rows, false), false)
     const { rows: papers } = buildPapers(rows, mapping)
-    expect(papers.length).toBeGreaterThanOrEqual(100)
+    expect(papers).toHaveLength(2)
     expect(papers.every((p) => /^\d+$/.test(p.id))).toBe(true)
-    expect(papers[0].title.length).toBeGreaterThan(0)
+    expect(papers[0].id).toBe('2267001') // BOM stripped from the first cell
+    expect(papers[0].abstract).toContain('\n') // embedded newline preserved in-cell
+    expect(papers[0].title).toBe('Data and Learning')
   })
 })
