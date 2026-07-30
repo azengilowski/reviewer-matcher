@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { AppStoreProvider, useApp } from './state/AppStore'
 import { HowItWorksModal } from './screens/HowItWorks'
 import { Stepper } from './screens/Stepper'
@@ -22,7 +22,9 @@ export function App() {
 
 function AppShell() {
   const [showHelp, setShowHelp] = useState(false)
-  const { reviewers, papers } = useApp()
+  const [showReset, setShowReset] = useState(false)
+  const { reviewers, papers, resetApp, resetEpoch } = useApp()
+  const navigate = useNavigate()
   const { pathname } = useLocation()
   const mainRef = useRef<HTMLElement>(null)
   // Reset the scroll container to the top whenever the view changes, so a new
@@ -72,6 +74,17 @@ function AppShell() {
           </span>
         )}
         <button
+          className="app__reset"
+          onClick={() => setShowReset(true)}
+          title="Reset the app: clear all data and restore default settings"
+          aria-label="Reset the app"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 12 a9 9 0 1 0 3 -6.7" />
+            <path d="M3 4 v5 h5" />
+          </svg>
+        </button>
+        <button
           className="app__help"
           onClick={() => setShowHelp(true)}
           title="How this app works: privacy, matching, and files"
@@ -95,7 +108,47 @@ function AppShell() {
         </button>
       </header>
       {showHelp && <HowItWorksModal onClose={() => setShowHelp(false)} />}
-      <main className="app__main" ref={mainRef}>
+      {showReset && (
+        <div className="modal-backdrop" onClick={() => setShowReset(false)}>
+          <div
+            className="modal modal--confirm"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirm app reset"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal__head">
+              <strong>Reset the app?</strong>
+              <button className="modal__close" onClick={() => setShowReset(false)} aria-label="Close">
+                ×
+              </button>
+            </div>
+            <p className="modal__hint">
+              This clears all uploaded reviewers and papers, the match and every edit, and restores
+              default settings. Export a <code>.matchproj</code> first if you want to keep your
+              work. This can't be undone.
+            </p>
+            <div className="modal__foot">
+              <button className="btn btn--ghost" onClick={() => setShowReset(false)}>
+                Cancel
+              </button>
+              <button
+                className="btn btn--danger"
+                onClick={() => {
+                  resetApp()
+                  setShowReset(false)
+                  navigate('/upload')
+                }}
+              >
+                Reset everything
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Keyed on resetEpoch so a full app reset also clears screens' local UI
+          state (e.g. a half-configured import wizard). */}
+      <main className="app__main" ref={mainRef} key={resetEpoch}>
         <Routes>
           <Route path="/" element={<Navigate to="/upload" replace />} />
           <Route path="/upload" element={<UploadScreen />} />

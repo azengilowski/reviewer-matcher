@@ -110,7 +110,7 @@ body {
   margin-left: 0.3rem;
 }
 /* The counts and help label are niceties; give the stepper the room on
-   narrow windows (the help button collapses to its icon). */
+   narrow windows (the help button collapses to a round icon). */
 @media (max-width: 1000px) {
   .app__counts {
     display: none;
@@ -119,12 +119,41 @@ body {
     display: none;
   }
   .app__help {
-    padding: 0.3rem 0.45rem;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    justify-content: center;
+    flex-shrink: 0;
   }
   .app__help svg {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
   }
+}
+
+/* Round icon button: reset the app. */
+.app__reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.app__reset:hover {
+  color: #c0392b;
+  border-color: #c0392b;
+  background: #fdeaea;
+}
+.app__reset svg {
+  display: block;
 }
 
 .app__help {
@@ -380,6 +409,15 @@ body {
   background: var(--accent-weak);
   border-color: var(--accent);
   color: var(--accent);
+}
+/* Destructive confirmation actions. */
+.btn--danger {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+.btn--danger:hover:not(:disabled) {
+  background: #a93226;
+  border-color: #a93226;
 }
 /* Smaller tier for utility controls (undo/redo). */
 .btn--sm {
@@ -721,6 +759,11 @@ details.warnings summary {
 .settings-field input[type='text'] {
   width: 13rem;
   max-width: 45vw;
+}
+/* Empty/invalid drafts stand out until a real value is entered. */
+.input--invalid {
+  border-color: #c0392b !important;
+  background: #fdeaea;
 }
 .settings-field__label {
   display: block;

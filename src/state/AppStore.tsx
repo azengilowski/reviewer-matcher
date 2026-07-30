@@ -44,6 +44,12 @@ interface AppState {
   status: MatchStatus
   error: string | null
   progress: ProgressUpdate | null
+  /** True while a settings field holds an empty/invalid draft (blocks Next: Match). */
+  settingsInvalid: boolean
+  /** True when the bundled sample is the most recently loaded data. */
+  sampleLoaded: boolean
+  /** Bumped by resetApp so screens with local UI state remount fresh. */
+  resetEpoch: number
 }
 
 interface AppActions {
@@ -59,6 +65,10 @@ interface AppActions {
   toggleLock: (paperId: string) => void
   /** Restore full state from an imported project file (SPEC §5.8). */
   loadProject: (project: ProjectFile) => void
+  setSettingsInvalid: (invalid: boolean) => void
+  setSampleLoaded: (loaded: boolean) => void
+  /** Wipe everything back to a fresh install: data, match, settings, history. */
+  resetApp: () => void
 }
 
 const AppContext = createContext<(AppState & AppActions) | null>(null)
@@ -83,6 +93,9 @@ export function AppStoreProvider({ children, runner = workerRunner }: ProviderPr
   const [status, setStatus] = useState<MatchStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   const [progress, setProgress] = useState<ProgressUpdate | null>(null)
+  const [settingsInvalid, setSettingsInvalid] = useState(false)
+  const [sampleLoaded, setSampleLoaded] = useState(false)
+  const [resetEpoch, setResetEpoch] = useState(0)
 
   // Uploading new data invalidates any existing run.
   const setReviewersAction = useCallback((next: Reviewer[]) => {
@@ -195,6 +208,34 @@ export function AppStoreProvider({ children, runner = workerRunner }: ProviderPr
     setFuture([])
     setStatus(project.run ? 'done' : 'idle')
     setError(null)
+    setSampleLoaded(false)
+  }, [])
+
+  /** Back to a fresh install: state resets and the autosave persists the blank
+   *  slate; remembered import column mappings are forgotten too. */
+  const resetApp = useCallback(() => {
+    setReviewers([])
+    setPapers([])
+    setSettings(DEFAULT_SETTINGS)
+    setRun(null)
+    setAssignments([])
+    setLockedPapers([])
+    setRunHistory([])
+    setPast([])
+    setFuture([])
+    setAuditLog([])
+    setStatus('idle')
+    setError(null)
+    setProgress(null)
+    setSettingsInvalid(false)
+    setSampleLoaded(false)
+    setResetEpoch((n) => n + 1)
+    try {
+      localStorage.removeItem('mapping.reviewers')
+      localStorage.removeItem('mapping.papers')
+    } catch {
+      /* storage may be unavailable */
+    }
   }, [])
 
   // --- Persistence: hydrate once on mount, then autosave on change (SPEC §9).
@@ -241,6 +282,9 @@ export function AppStoreProvider({ children, runner = workerRunner }: ProviderPr
       status,
       error,
       progress,
+      settingsInvalid,
+      sampleLoaded,
+      resetEpoch,
       setReviewers: setReviewersAction,
       setPapers: setPapersAction,
       setSettings,
@@ -250,8 +294,11 @@ export function AppStoreProvider({ children, runner = workerRunner }: ProviderPr
       redo,
       toggleLock,
       loadProject,
+      setSettingsInvalid,
+      setSampleLoaded,
+      resetApp,
     }),
-    [reviewers, papers, settings, run, assignments, lockedPapers, runHistory, auditLog, past.length, future.length, status, error, progress, setReviewersAction, setPapersAction, runMatching, commitAssignments, undo, redo, toggleLock, loadProject],
+    [reviewers, papers, settings, run, assignments, lockedPapers, runHistory, auditLog, past.length, future.length, status, error, progress, settingsInvalid, sampleLoaded, resetEpoch, setReviewersAction, setPapersAction, runMatching, commitAssignments, undo, redo, toggleLock, loadProject, resetApp],
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

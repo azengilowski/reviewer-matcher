@@ -44,4 +44,15 @@ describe('SettingsScreen', () => {
     fireEvent.change(cap, { target: { value: '3' } })
     expect(cap).toHaveValue(3)
   })
+
+  it('allows clearing a number field, marking it invalid until refilled', () => {
+    renderSettings()
+    const cap = screen.getByLabelText(/reviewers per paper/i)
+    fireEvent.change(cap, { target: { value: '' } })
+    expect(cap).toHaveValue(null)
+    expect(cap).toHaveAttribute('aria-invalid', 'true')
+    fireEvent.change(cap, { target: { value: '5' } })
+    expect(cap).toHaveValue(5)
+    expect(cap).not.toHaveAttribute('aria-invalid')
+  })
 })

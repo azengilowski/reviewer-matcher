@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   buildPapers,
   buildReviewers,
@@ -13,9 +13,19 @@ import { ProjectBar } from './ProjectBar'
 import { ScreenShell } from './ScreenShell'
 
 export function UploadScreen() {
-  const { reviewers, papers, setReviewers, setPapers } = useApp()
+  const { reviewers, papers, setReviewers, setPapers, sampleLoaded, setSampleLoaded } = useApp()
   const [warnings, setWarnings] = useState<string[]>([])
   const [loadingSample, setLoadingSample] = useState(false)
+
+  // Transient confirmation toast (sample loaded / sample cleared).
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  function showToast(message: string) {
+    setToast(message)
+    clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(null), 4000)
+  }
+  useEffect(() => () => clearTimeout(toastTimer.current), [])
 
   async function loadSample() {
     setLoadingSample(true)
@@ -33,8 +43,31 @@ export function UploadScreen() {
       setReviewers(r.rows)
       setPapers(p.rows)
       setWarnings([...r.warnings, ...p.warnings])
+      setSampleLoaded(true)
+      showToast(`✓ Sample data loaded: ${r.rows.length} reviewers and ${p.rows.length} papers.`)
     } finally {
       setLoadingSample(false)
+    }
+  }
+
+  /** Importing your own file right after the sample clears the sample from the
+   *  other side, so real and sample data never mix in a match. */
+  function importReviewers(rows: Reviewer[], w: string[]) {
+    setReviewers(rows)
+    setWarnings(w)
+    if (sampleLoaded) {
+      setPapers([])
+      setSampleLoaded(false)
+      showToast(`✓ Imported ${rows.length} reviewers and cleared the sample papers.`)
+    }
+  }
+  function importPapers(rows: Paper[], w: string[]) {
+    setPapers(rows)
+    setWarnings(w)
+    if (sampleLoaded) {
+      setReviewers([])
+      setSampleLoaded(false)
+      showToast(`✓ Imported ${rows.length} papers and cleared the sample reviewers.`)
     }
   }
 
@@ -50,10 +83,7 @@ export function UploadScreen() {
             fields={REVIEWER_FIELDS}
             storageKey="mapping.reviewers"
             build={buildReviewers}
-            onImport={(rows, w) => {
-              setReviewers(rows)
-              setWarnings(w)
-            }}
+            onImport={importReviewers}
           />
           <p
             className={`upload-card__count${reviewers.length > 0 ? ' upload-card__count--ok' : ''}`}
@@ -84,10 +114,7 @@ export function UploadScreen() {
             fields={PAPER_FIELDS}
             storageKey="mapping.papers"
             build={buildPapers}
-            onImport={(rows, w) => {
-              setPapers(rows)
-              setWarnings(w)
-            }}
+            onImport={importPapers}
           />
           <p
             className={`upload-card__count${papers.length > 0 ? ' upload-card__count--ok' : ''}`}
@@ -112,8 +139,17 @@ export function UploadScreen() {
         </div>
       </div>
 
-      <button className="btn btn--ghost" onClick={loadSample} disabled={loadingSample}>
-        {loadingSample ? 'Loading…' : 'Load sample data'}
+      <button
+        className="btn btn--ghost"
+        onClick={loadSample}
+        disabled={loadingSample || sampleLoaded}
+        title={
+          sampleLoaded
+            ? 'Sample data is loaded. Import your own file to replace it.'
+            : 'Load a small synthetic data set to try the app'
+        }
+      >
+        {loadingSample ? 'Loading…' : sampleLoaded ? '✓ Sample data loaded' : 'Load sample data'}
       </button>
 
       <hr className="rule" />
@@ -133,6 +169,12 @@ export function UploadScreen() {
             ))}
           </ul>
         </details>
+      )}
+
+      {toast && (
+        <div className="toast" role="status" aria-live="polite">
+          {toast}
+        </div>
       )}
     </ScreenShell>
   )

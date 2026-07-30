@@ -1,15 +1,41 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { computeFeasibility } from '../domain/feasibility'
 import { capacityForPaper, DEFAULT_SETTINGS, loadForReviewer } from '../domain/settings'
 import { EMBEDDING_MODELS } from '../similarity/models'
 import type { MatchSettings } from '../domain/types'
 import { useApp } from '../state/AppStore'
+import { NumberField } from './NumberField'
 import { ScreenShell } from './ScreenShell'
 
 export function SettingsScreen() {
-  const { reviewers, papers, settings, setSettings } = useApp()
+  const { reviewers, papers, settings, setSettings, setSettingsInvalid } = useApp()
   const feasibility = computeFeasibility(reviewers, papers, settings)
   const isDefault = JSON.stringify(settings) === JSON.stringify(DEFAULT_SETTINGS)
+
+  // Fields currently holding an empty/invalid draft. The store only ever sees
+  // valid values; this set gates "Next: Match" until every field is filled in.
+  const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set())
+  // Remounts the number fields so "Reset to defaults" also clears empty drafts.
+  const [fieldsEpoch, setFieldsEpoch] = useState(0)
+  const fieldValidity = (key: string) => (valid: boolean) =>
+    setInvalidFields((prev) => {
+      if (valid ? !prev.has(key) : prev.has(key)) return prev
+      const next = new Set(prev)
+      if (valid) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  useEffect(() => {
+    setSettingsInvalid(invalidFields.size > 0)
+  }, [invalidFields, setSettingsInvalid])
+  // Leaving the screen discards drafts, so the gate lifts with them.
+  useEffect(() => () => setSettingsInvalid(false), [setSettingsInvalid])
+
+  function resetToDefaults() {
+    setSettings(DEFAULT_SETTINGS)
+    setInvalidFields(new Set())
+    setFieldsEpoch((n) => n + 1)
+  }
 
   function update(patch: Partial<MatchSettings>) {
     setSettings({ ...settings, ...patch })
@@ -26,7 +52,7 @@ export function SettingsScreen() {
       <div className="settings-topbar">
         <button
           className="btn btn--ghost btn--sm"
-          onClick={() => setSettings(DEFAULT_SETTINGS)}
+          onClick={resetToDefaults}
           disabled={isDefault}
           title="Restore every setting to its default value"
         >
@@ -34,16 +60,16 @@ export function SettingsScreen() {
         </button>
       </div>
 
-      <section className="settings-group">
+      <section className="settings-group" key={fieldsEpoch}>
         <h3>Capacity &amp; load</h3>
         <label className="settings-field">
           <span>Reviewers per paper (default capacity)</span>
-          <input
-            type="number"
-            min={1}
+          <NumberField
             value={settings.paperCapacity}
-            aria-label="Reviewers per paper"
-            onChange={(e) => update({ paperCapacity: Math.max(1, Number(e.target.value) || 1) })}
+            min={1}
+            ariaLabel="Reviewers per paper"
+            onCommit={(n) => update({ paperCapacity: n })}
+            onValidityChange={fieldValidity('paperCapacity')}
           />
         </label>
 
@@ -52,35 +78,35 @@ export function SettingsScreen() {
           {Object.entries(settings.loadsByRole).map(([role, load]) => (
             <label key={role} className="settings-role">
               <span>{role}</span>
-              <input
-                type="number"
-                min={0}
+              <NumberField
                 value={load}
-                aria-label={`Load for ${role}`}
-                onChange={(e) => updateRoleLoad(role, Math.max(0, Number(e.target.value) || 0))}
+                min={0}
+                ariaLabel={`Load for ${role}`}
+                onCommit={(n) => updateRoleLoad(role, n)}
+                onValidityChange={fieldValidity(`load:${role}`)}
               />
             </label>
           ))}
           <label className="settings-role">
             <span title="Used for any role that isn't listed above">any unlisted role</span>
-            <input
-              type="number"
-              min={0}
+            <NumberField
               value={settings.defaultLoad}
-              aria-label="Default load"
-              onChange={(e) => update({ defaultLoad: Math.max(0, Number(e.target.value) || 0) })}
+              min={0}
+              ariaLabel="Default load"
+              onCommit={(n) => update({ defaultLoad: n })}
+              onValidityChange={fieldValidity('defaultLoad')}
             />
           </label>
         </div>
 
         <label className="settings-field">
           <span>Minimum papers per reviewer (0 = off)</span>
-          <input
-            type="number"
-            min={0}
+          <NumberField
             value={settings.minLoad}
-            aria-label="Minimum papers per reviewer"
-            onChange={(e) => update({ minLoad: Math.max(0, Number(e.target.value) || 0) })}
+            min={0}
+            ariaLabel="Minimum papers per reviewer"
+            onCommit={(n) => update({ minLoad: n })}
+            onValidityChange={fieldValidity('minLoad')}
           />
         </label>
         <p className="muted settings-hint">
@@ -199,6 +225,7 @@ function OverridesPanel() {
                   placeholder={String(loadForReviewer({ ...r, loadOverride: undefined }, settings))}
                   value={r.loadOverride ?? ''}
                   aria-label={`Load override for ${r.name}`}
+                  onWheel={(e) => e.currentTarget.blur()}
                   onChange={(e) => {
                     const v = e.target.value === '' ? undefined : Math.max(0, Number(e.target.value) || 0)
                     setReviewers(reviewers.map((x) => (x.id === r.id ? { ...x, loadOverride: v } : x)))
@@ -220,6 +247,7 @@ function OverridesPanel() {
                   placeholder={String(capacityForPaper({ ...p, capacityOverride: undefined }, settings))}
                   value={p.capacityOverride ?? ''}
                   aria-label={`Capacity override for ${p.id}`}
+                  onWheel={(e) => e.currentTarget.blur()}
                   onChange={(e) => {
                     const v = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value) || 1)
                     setPapers(papers.map((x) => (x.id === p.id ? { ...x, capacityOverride: v } : x)))
