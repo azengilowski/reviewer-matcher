@@ -63,8 +63,8 @@ function AppShell() {
           <Route path="/debug/engine" element={<DebugEngineScreen />} />
           <Route path="*" element={<Navigate to="/upload" replace />} />
         </Routes>
-        <StepFooter />
       </main>
+      <StepFooter />
     </div>
   )
 }
