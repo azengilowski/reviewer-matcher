@@ -1230,6 +1230,34 @@ details.warnings summary {
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
+/* Review step sub-navigation (Overview / Details) */
+.review-subnav {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin: 0 0 1.25rem;
+  padding: 0.25rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.review-subtab {
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.review-subtab:hover {
+  color: var(--text);
+}
+.review-subtab--on {
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 .detail-tabs {
   display: flex;
   gap: 0.25rem;

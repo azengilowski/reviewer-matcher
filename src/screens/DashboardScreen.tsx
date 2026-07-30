@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { computeDashboard, type Bar, type Pairing } from '../analytics/stats'
 import { useApp } from '../state/AppStore'
+import { ReviewSubnav } from './ReviewSubnav'
 import { ScreenShell } from './ScreenShell'
 
 export function DashboardScreen() {
@@ -18,7 +19,7 @@ export function DashboardScreen() {
 
   if (!run || !stats || !autoStats) {
     return (
-      <ScreenShell title="Match quality" intro="Run a match to see how well it went.">
+      <ScreenShell title="Match quality" intro="Run a match to see how well it went." nav={<ReviewSubnav />}>
         <p className="muted">No match yet — go to the Match tab and run one.</p>
       </ScreenShell>
     )
@@ -27,7 +28,11 @@ export function DashboardScreen() {
   const edited = stats.manual > 0
 
   return (
-    <ScreenShell title="Match quality" intro="How well the match went — load, preference satisfaction, and outliers.">
+    <ScreenShell
+      title="Match quality"
+      intro="How well the match went — load, preference satisfaction, and outliers."
+      nav={<ReviewSubnav />}
+    >
       <div className="stat-tiles">
         <Tile label="Assignments" value={stats.assignments} />
         <Tile label="Reviewers get #1" value={`${Math.round(stats.pctTop1)}%`} />

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { explainPair, type ChoiceStatus } from '../editing/explain'
 import { reviewerRankOf } from '../editing/validation'
 import { useApp } from '../state/AppStore'
+import { ReviewSubnav } from './ReviewSubnav'
 import { ScreenShell } from './ScreenShell'
 
 type Mode = 'paper' | 'reviewer'
@@ -35,7 +36,11 @@ export function DetailScreen() {
 
   if (!run) {
     return (
-      <ScreenShell title="Preference details" intro="Run a match first to see ranked preferences.">
+      <ScreenShell
+        title="Preference details"
+        intro="Run a match first to see ranked preferences."
+        nav={<ReviewSubnav />}
+      >
         <p className="muted">No match yet — go to the Match tab and run one.</p>
       </ScreenShell>
     )
@@ -68,6 +73,7 @@ export function DetailScreen() {
     <ScreenShell
       title="Preference details"
       intro="For any paper or reviewer, see the full ranked list, the chosen pair, and why each option was or wasn't matched."
+      nav={<ReviewSubnav />}
     >
       <div className="detail-controls">
         <div className="detail-tabs">
