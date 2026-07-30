@@ -1023,8 +1023,9 @@ details.warnings summary {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
   background: var(--surface);
   border: 1px solid var(--accent);
+  /* Width is set inline to match the source card; fall back to fitting the name. */
   width: max-content;
-  max-width: 220px;
+  margin-bottom: 0;
 }
 .card--manual {
   border-color: var(--accent);

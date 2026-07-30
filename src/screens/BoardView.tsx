@@ -109,6 +109,9 @@ export function BoardView({ run }: { run: MatchRun }) {
 
   // Name shown in the floating drag preview that follows the cursor.
   const [activeName, setActiveName] = useState<string | null>(null)
+  // Width of the card being dragged, so the floating clone matches its source
+  // instead of shrinking to fit just the name.
+  const [activeWidth, setActiveWidth] = useState<number | undefined>(undefined)
 
   // Transient toast explaining why a drop was rejected.
   const [toast, setToast] = useState<string | null>(null)
@@ -123,6 +126,12 @@ export function BoardView({ run }: { run: MatchRun }) {
   function onDragStart(event: DragStartEvent) {
     const { reviewerId } = parseDrag(String(event.active.id))
     setActiveName(nameById.get(reviewerId) ?? reviewerId)
+    // Match the clone to the source card's rendered width. Measure the actual
+    // dragged element (opacity doesn't change its box) and fall back to dnd-kit's
+    // measured rect if the DOM node isn't reachable.
+    const target = event.activatorEvent?.target
+    const sourceEl = target instanceof Element ? target.closest('.card') : null
+    setActiveWidth(sourceEl?.getBoundingClientRect().width ?? event.active.rect.current.initial?.width)
   }
 
   // Paper whose "Add reviewers" picker is open (null = closed).
@@ -147,6 +156,7 @@ export function BoardView({ run }: { run: MatchRun }) {
 
   function onDragEnd(event: DragEndEvent) {
     setActiveName(null)
+    setActiveWidth(undefined)
     if (!event.over) return
     const { source, reviewerId } = parseDrag(String(event.active.id))
     const target = String(event.over.id)
@@ -186,7 +196,10 @@ export function BoardView({ run }: { run: MatchRun }) {
       sensors={sensors}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      onDragCancel={() => setActiveName(null)}
+      onDragCancel={() => {
+        setActiveName(null)
+        setActiveWidth(undefined)
+      }}
     >
       <div className="board-toolbar">
         <input
@@ -410,7 +423,7 @@ export function BoardView({ run }: { run: MatchRun }) {
       {/* Floating clone that follows the cursor during a drag. */}
       <DragOverlay>
         {activeName ? (
-          <div className="card card--overlay">
+          <div className="card card--overlay" style={{ width: activeWidth }}>
             <span className="card__name">{activeName}</span>
           </div>
         ) : null}
