@@ -101,7 +101,7 @@ export function buildReviewers(
   rows.forEach((row, i) => {
     const id = cell(row, mapping.id)
     if (!id) {
-      warnings.push(`Reviewer row ${i + 1} has no id — skipped.`)
+      warnings.push(`Reviewer row ${i + 1} has no id, skipped.`)
       return
     }
     const name = cell(row, mapping.name) || id
@@ -110,7 +110,7 @@ export function buildReviewers(
     const criteria = [cell(row, mapping.criteria), cell(row, mapping.criteria2)]
       .filter(Boolean)
       .join('\n')
-    if (!criteria) warnings.push(`Reviewer "${name}" has no criteria — may be hard to match.`)
+    if (!criteria) warnings.push(`Reviewer "${name}" has no criteria, may be hard to match.`)
     out.push({
       id,
       name,
@@ -131,14 +131,14 @@ export function buildPapers(
   rows.forEach((row, i) => {
     const id = cell(row, mapping.id)
     if (!id) {
-      warnings.push(`Paper row ${i + 1} has no id — skipped.`)
+      warnings.push(`Paper row ${i + 1} has no id, skipped.`)
       return
     }
     const title = cell(row, mapping.title)
     const abstract = cell(row, mapping.abstract)
     const keywords = cell(row, mapping.keywords)
     if (!title && !abstract && !keywords) {
-      warnings.push(`Paper "${id}" has no text — may be hard to match.`)
+      warnings.push(`Paper "${id}" has no text, may be hard to match.`)
     }
     out.push({
       id,

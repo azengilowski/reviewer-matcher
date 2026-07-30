@@ -20,7 +20,7 @@ export function DashboardScreen() {
   if (!run || !stats || !autoStats) {
     return (
       <ScreenShell title="Match quality" intro="Run a match to see how well it went." nav={<ReviewSubnav />}>
-        <p className="muted">No match yet — go to the Match tab and run one.</p>
+        <p className="muted">No match yet. Go to the Match tab and run one.</p>
       </ScreenShell>
     )
   }
@@ -30,7 +30,7 @@ export function DashboardScreen() {
   return (
     <ScreenShell
       title="Match quality"
-      intro="How well the match went — load, preference satisfaction, and outliers."
+      intro="How well the match went: load, preference satisfaction, and outliers."
       nav={<ReviewSubnav />}
     >
       <div className="stat-tiles">
@@ -110,7 +110,7 @@ export function DashboardScreen() {
                   <td>{h.assignments}</td>
                   <td>{h.meanPaperRank.toFixed(2)}</td>
                   <td>{h.unfilledPapers}</td>
-                  <td>{h.stable ? '✓' : '—'}</td>
+                  <td>{h.stable ? '✓' : 'no'}</td>
                 </tr>
               ))}
             </tbody>

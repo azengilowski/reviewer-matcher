@@ -253,6 +253,7 @@ body {
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
+  text-decoration: none;
   cursor: pointer;
 }
 .btn:disabled {
@@ -1191,6 +1192,18 @@ details.warnings summary {
   line-height: 1.4;
   color: var(--muted);
   text-align: center;
+}
+.prose__aside {
+  margin: 0.55rem 0 0 !important;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--border);
+  font-size: 0.82rem !important;
+  color: var(--muted) !important;
+}
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* Simple confirmation dialog: no internal divider lines. */

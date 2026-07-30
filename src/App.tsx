@@ -30,7 +30,7 @@ function AppShell() {
         <button
           className="app__help"
           onClick={() => setShowHelp(true)}
-          title="How this app works — privacy, matching, and files"
+          title="How this app works: privacy, matching, and files"
         >
           <svg
             width="14"

@@ -49,7 +49,9 @@
       "Bash(gh api *)",
       "Bash(gh repo *)",
       "Bash(gh run *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(npx tsc *)",
+      "Bash(git restore *)"
     ]
   }
 }

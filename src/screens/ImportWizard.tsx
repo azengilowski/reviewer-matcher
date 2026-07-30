@@ -110,7 +110,7 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
                   aria-label={`Map ${label} ${f.label}`}
                   onChange={(e) => setField(f.key, Number(e.target.value))}
                 >
-                  <option value={-1}>— none —</option>
+                  <option value={-1}>(none)</option>
                   {headers.map((h, i) => (
                     <option key={i} value={i}>
                       {h}

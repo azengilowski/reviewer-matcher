@@ -41,7 +41,7 @@ export function DetailScreen() {
         intro="Run a match first to see ranked preferences."
         nav={<ReviewSubnav />}
       >
-        <p className="muted">No match yet — go to the Match tab and run one.</p>
+        <p className="muted">No match yet. Go to the Match tab and run one.</p>
       </ScreenShell>
     )
   }
@@ -50,7 +50,7 @@ export function DetailScreen() {
   const currentId = selectedId || allOptions[0]?.id || ''
   const labelFor = (id: string) =>
     mode === 'paper'
-      ? `${id} — ${(paperMap.get(id)?.title ?? '').slice(0, 50)}`
+      ? `${id}: ${(paperMap.get(id)?.title ?? '').slice(0, 50)}`
       : reviewerMap.get(id)?.name ?? id
   const pq = pickerQuery.trim().toLowerCase()
   const matches = (id: string) => {
@@ -218,5 +218,5 @@ function ReviewerDetail({ reviewerId, reviewerMap, paperMap, settings, run, assi
 }
 
 function rankLabel(rank: number): string {
-  return rank > 0 ? `#${rank}` : '—'
+  return rank > 0 ? `#${rank}` : 'n/a'
 }

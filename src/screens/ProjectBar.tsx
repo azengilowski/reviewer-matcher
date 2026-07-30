@@ -21,7 +21,7 @@ export function ProjectBar() {
 
   async function onResultsFile(file: File) {
     if (reviewers.length === 0 || papers.length === 0) {
-      setMessage('⚠️ Load reviewers and papers first — results are matched against them by name.')
+      setMessage('⚠️ Load reviewers and papers first: results are matched against them by name.')
       return
     }
     const rep = importResultsCsv(await file.text(), reviewers, papers, run)

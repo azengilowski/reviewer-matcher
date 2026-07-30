@@ -39,14 +39,14 @@ export function ExportScreen() {
   return (
     <ScreenShell
       title="Export"
-      intro="Take your work out of the app. Everything is generated in your browser — nothing is uploaded."
+      intro="Take your work out of the app. Everything is generated in your browser, nothing is uploaded."
     >
       {!hasRun && <p className="muted">Run a match first to export results and reports.</p>}
 
       <div className="export-grid">
         <ExportCard
           title="Project file (.matchproj)"
-          desc="A complete, re-openable backup — reviewers, papers, settings, the match, and every edit. Re-import it on the Upload step to pick up exactly where you left off."
+          desc="A complete, re-openable backup: reviewers, papers, settings, the match, and every edit. Re-import it on the Upload step to pick up exactly where you left off."
           buttonLabel="Export .matchproj"
           onClick={exportProject}
           disabled={!hasData}

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-/** Modal explaining privacy, embeddings, matching, and import/export —
+/** Modal explaining privacy, embeddings, matching, and import/export,
  *  in plain language, with a small diagram for each idea. */
 export function HowItWorksModal({ onClose }: { onClose: () => void }) {
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -31,7 +31,7 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
 
         <div className="modal__body prose" ref={bodyRef}>
           <p className="prose__lead">
-            Here's the whole thing in plain language — no jargon required. It takes about two minutes
+            Here's the whole thing in plain language, no jargon required. It takes about two minutes
             to read.
           </p>
 
@@ -39,14 +39,14 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
             <h4>🔒 It all happens on your computer</h4>
             <p>
               Good news first: there's no server, no sign-up, and nothing to upload. Your reviewers
-              and papers stay right here in this browser tab — we read them, do the matching, and
-              save your work all on your own machine. The one time the app reaches out to the
+              and papers stay right here in this browser tab, where we read them, do the matching,
+              and save your work all on your own machine. The one time the app reaches out to the
               internet is to grab the matching model on your first visit. After that it's tucked away
               for reuse, and everything keeps working even offline.
             </p>
             <figure className="prose__figure">
               <LocalDiagram />
-              <figcaption>Your data never leaves this tab — there's nothing to upload.</figcaption>
+              <figcaption>Your data never leaves this tab, so there's nothing to upload.</figcaption>
             </figure>
           </section>
 
@@ -56,7 +56,7 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
               Before it can match anyone, the app needs a feel for the topics involved. It reads each
               reviewer's specialties and each paper's title, abstract, keywords, and method, and
               turns that text into a point on a giant “map of ideas.” Papers and reviewers that land
-              near each other are about similar things — so they're likely a good fit. This quiet
+              near each other are about similar things, so they're likely a good fit. This quiet
               bit of number-crunching happens in the background, so the app stays snappy while it
               works.
             </p>
@@ -71,18 +71,29 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
             <p>
               Now the app plays matchmaker. Every paper has a wish-list of reviewers (closest topics
               first), and every reviewer has a wish-list of papers. It works through those lists to
-              pair everyone up as well as possible — filling each paper up to its reviewer limit and
+              pair everyone up as well as possible, filling each paper up to its reviewer limit and
               keeping each reviewer's workload sensible. The result is <em>stable</em>: there's no
               paper-and-reviewer pair who'd both secretly rather have been matched with each other.
-              And nobody is ever handed their own paper to review. You hold the dials — capacities,
+              And nobody is ever handed their own paper to review. You hold the dials: capacities,
               workloads, and more all live in Settings.
             </p>
             <figure className="prose__figure">
               <MatchDiagram />
               <figcaption>
-                Each paper gets the reviewers nearest the top of its list — never its own authors.
+                Each paper gets the reviewers nearest the top of its list, never its own authors.
               </figcaption>
             </figure>
+            <p className="prose__aside">
+              For the curious: this is the{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Stable_marriage_problem"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                stable-marriage algorithm
+              </a>{' '}
+              (a many-to-many “deferred acceptance” version of Gale-Shapley).
+            </p>
           </section>
 
           <section>
@@ -92,8 +103,8 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
               reviewer from one paper to another, add or remove people, and search or sort to find
               exactly what you need. Happy with a paper? Lock it, and it stays put even if you re-run
               the match. Changed your mind? Every edit can be undone. Curious about the reasoning? The
-              Review tab shows each paper's full ranked list and explains why each reviewer did — or
-              didn't — make the cut.
+              Review tab shows each paper's full ranked list and explains why each reviewer did or
+              didn't make the cut.
             </p>
             <figure className="prose__figure">
               <TuneDiagram />
@@ -104,7 +115,7 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
           <section>
             <h4>Getting your data in and out</h4>
             <p>
-              Bring your reviewers and papers in from a CSV or Excel file — you just tell the app
+              Bring your reviewers and papers in from a CSV or Excel file. You just tell the app
               which column is which, and preview everything before it's imported. When you're done,
               take your work with you: export the assignments as a spreadsheet, a detailed per-paper
               report, or a single <code>.matchproj</code> file that saves <em>everything</em> (data,
@@ -202,9 +213,9 @@ function EmbedDiagram() {
       <text x="26" y="106" fontSize="12" fontWeight="700" fill="var(--text)">Reviewer</text>
       <text x="26" y="121" fontSize="9.5" fill="var(--muted)">specialties · criteria</text>
       {/* becomes a point */}
-      <text x="208" y="72" textAnchor="middle" fontSize="9.5" fill="var(--muted)">becomes</text>
-      <text x="208" y="84" textAnchor="middle" fontSize="9.5" fill="var(--muted)">a point</text>
-      <RightArrow x1={170} x2={248} y={79} />
+      <text x="209" y="63" textAnchor="middle" fontSize="9.5" fill="var(--muted)">becomes</text>
+      <text x="209" y="75" textAnchor="middle" fontSize="9.5" fill="var(--muted)">a point</text>
+      <RightArrow x1={172} x2={246} y={90} />
       {/* topic map */}
       <rect x="256" y="28" width="250" height="102" rx="10" fill="var(--bg)" stroke="var(--border)" strokeWidth="2" />
       <text x="267" y="44" fontSize="9.5" fill="var(--muted)">map of ideas</text>

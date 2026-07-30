@@ -157,7 +157,7 @@ export function BoardView({ run }: { run: MatchRun }) {
     // Explain the common rejections with a toast (checked before the same-paper
     // no-op, so dropping a reviewer back onto a paper they're on still explains it).
     if (targetPaperId && lockedSet.has(targetPaperId)) {
-      showToast(`Paper ${targetPaperId} is locked — unlock it to change its reviewers.`)
+      showToast(`Paper ${targetPaperId} is locked. Unlock it to change its reviewers.`)
       return
     }
     if (
@@ -174,7 +174,7 @@ export function BoardView({ run }: { run: MatchRun }) {
     const result = computeMove(assignments, run, name, sourcePaperId, reviewerId, targetPaperId)
     if (result === 'conflict') {
       showToast(
-        `${name} can't be added to paper ${targetPaperId} — they're an author of it (self-authorship conflict).`,
+        `${name} can't be added to paper ${targetPaperId}: they're an author of it (self-authorship conflict).`,
       )
       return
     }
@@ -236,8 +236,8 @@ export function BoardView({ run }: { run: MatchRun }) {
               aria-label={`Sort ${sortDir === 'asc' ? 'ascending' : 'descending'}, click to reverse`}
               title={
                 sortDir === 'asc'
-                  ? 'Ascending order — click for descending'
-                  : 'Descending order — click for ascending'
+                  ? 'Ascending order (click for descending)'
+                  : 'Descending order (click for ascending)'
               }
             >
               <SortArrow dir={sortDir} />
@@ -269,7 +269,7 @@ export function BoardView({ run }: { run: MatchRun }) {
             <ul>
               {auditLog.slice(0, 30).map((e, i) => (
                 <li key={i}>
-                  <time>{new Date(e.at).toLocaleTimeString()}</time> — {e.detail}
+                  <time>{new Date(e.at).toLocaleTimeString()}</time> · {e.detail}
                 </li>
               ))}
             </ul>
@@ -313,7 +313,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                   <Link
                     className="col__id"
                     to={`/details?mode=paper&id=${encodeURIComponent(paper.id)}`}
-                    title={`Paper ${paper.id} — ${paper.title}. Click to see its ranked reviewers.`}
+                    title={`Paper ${paper.id}: ${paper.title}. Click to see its ranked reviewers.`}
                   >
                     {paper.id}
                   </Link>
@@ -333,7 +333,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                     aria-label={locked ? `Unlock ${paper.id}` : `Lock ${paper.id}`}
                     title={
                       locked
-                        ? 'Locked — protected from edits and preserved on re-run. Click to unlock.'
+                        ? 'Locked. Protected from edits and preserved on re-run. Click to unlock.'
                         : 'Lock this paper to protect its assignments from edits and re-runs.'
                     }
                   >
@@ -378,7 +378,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                   onRemove={locked ? undefined : () => removeAssignment(paper.id, a.reviewerId)}
                 />
               ))}
-              {assigned.length === 0 && <div className="col__empty">— empty —</div>}
+              {assigned.length === 0 && <div className="col__empty">(empty)</div>}
             </Column>
           )
         })}
@@ -399,7 +399,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                 highlight={reviewerMatches(r.id)}
               />
             ))}
-            {idleReviewers.length === 0 && <div className="col__empty">— none —</div>}
+            {idleReviewers.length === 0 && <div className="col__empty">(none)</div>}
           </Column>
         </aside>
       </div>
@@ -649,7 +649,7 @@ function Card({
   })
   const title =
     score != null
-      ? `${name} — match score ${score.toFixed(3)}${rank ? `, this paper's #${rank} choice` : ''}`
+      ? `${name}: match score ${score.toFixed(3)}${rank ? `, this paper's #${rank} choice` : ''}`
       : name
   return (
     <div

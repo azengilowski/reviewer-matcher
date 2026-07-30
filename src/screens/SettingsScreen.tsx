@@ -84,7 +84,7 @@ export function SettingsScreen() {
           />
         </label>
         <p className="muted settings-hint">
-          Enforces a fairness floor so no reviewer is left nearly idle — swaps under-loaded
+          Enforces a fairness floor so no reviewer is left nearly idle, swapping under-loaded
           reviewers onto papers, trading a little match quality for balance.
         </p>
 
@@ -108,7 +108,7 @@ export function SettingsScreen() {
           </select>
         </label>
         <p className="muted settings-hint">
-          Larger models download more and aren't necessarily better — on the AERA test set
+          Larger models download more and aren't necessarily better. On the AERA test set
           MiniLM-L6 (the default) matched the human panel best. Switching models re-downloads
           and requires a re-run.
         </p>
@@ -240,7 +240,7 @@ function FeasibilityBadge({ demand, supply, feasible }: ReturnType<typeof comput
       {feasible ? '✓' : '⚠️'} Demand {demand} reviewer-slots vs supply {supply}.{' '}
       {feasible
         ? 'Reviewers can cover all papers.'
-        : 'Not enough reviewer capacity — some papers will be under-filled.'}
+        : 'Not enough reviewer capacity, so some papers will be under-filled.'}
     </p>
   )
 }
