@@ -1169,6 +1169,29 @@ details.warnings summary {
   line-height: 1.55;
   color: var(--text);
 }
+.prose__lead {
+  color: var(--muted) !important;
+  font-size: 0.92rem !important;
+}
+.prose__figure {
+  margin: 0.7rem 0 0.2rem;
+}
+.prose__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px;
+}
+.prose figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+  text-align: center;
+}
 
 /* Simple confirmation dialog: no internal divider lines. */
 .modal--confirm .modal__head {
