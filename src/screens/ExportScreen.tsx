@@ -3,6 +3,7 @@ import { exportResultsCsv } from '../io/exportResults'
 import { exportReportCsv } from '../io/reportExport'
 import { serializeProject } from '../io/project'
 import { useApp } from '../state/AppStore'
+import { EmptyState } from './EmptyState'
 import { ScreenShell } from './ScreenShell'
 
 export function ExportScreen() {
@@ -41,8 +42,19 @@ export function ExportScreen() {
       title="Export"
       intro="Take your work out of the app. Everything is generated in your browser, nothing is uploaded."
     >
-      {!hasRun && <p className="muted">Run a match first to export results and reports.</p>}
+      {!hasData && (
+        <EmptyState
+          art="export"
+          text="Nothing to export yet. Import data and run a match, then collect your files here."
+          ctaTo="/upload"
+          ctaLabel="Go to Upload"
+        />
+      )}
+      {hasData && !hasRun && (
+        <p className="muted">Run a match first to export results and reports.</p>
+      )}
 
+      {hasData && (
       <div className="export-grid">
         <ExportCard
           title="Project file (.matchproj)"
@@ -66,6 +78,7 @@ export function ExportScreen() {
           disabled={!hasRun}
         />
       </div>
+      )}
     </ScreenShell>
   )
 }

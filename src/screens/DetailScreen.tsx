@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { explainPair, type ChoiceStatus } from '../editing/explain'
 import { reviewerRankOf } from '../editing/validation'
 import { useApp } from '../state/AppStore'
+import { EmptyState } from './EmptyState'
 import { ReviewSubnav } from './ReviewSubnav'
 import { ScreenShell } from './ScreenShell'
 
@@ -41,7 +42,12 @@ export function DetailScreen() {
         intro="Run a match first to see ranked preferences."
         nav={<ReviewSubnav />}
       >
-        <p className="muted">No match yet. Go to the Match tab and run one.</p>
+        <EmptyState
+          art="charts"
+          text="No match yet. Run one to see every ranked preference explained."
+          ctaTo="/match"
+          ctaLabel="Go to Match"
+        />
       </ScreenShell>
     )
   }

@@ -16,11 +16,15 @@ interface ScreenShellProps {
 export function ScreenShell({ title, intro, nav, children }: ScreenShellProps) {
   return (
     <section className="screen" aria-labelledby="screen-title">
-      {nav}
-      <h2 id="screen-title" className="screen__title">
-        {title}
-      </h2>
-      {intro && <p className="screen__intro">{intro}</p>}
+      <div className="screen__head">
+        <div className="screen__titlerow">
+          <h2 id="screen-title" className="screen__title">
+            {title}
+          </h2>
+          {nav && <div className="screen__nav">{nav}</div>}
+        </div>
+        {intro && <p className="screen__intro">{intro}</p>}
+      </div>
       {children}
     </section>
   )

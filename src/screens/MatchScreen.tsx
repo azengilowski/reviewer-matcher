@@ -43,28 +43,7 @@ export function MatchScreen() {
       title="Match"
       intro="Run the match, then drag reviewers to fine-tune. Assignments update live."
     >
-      {run || status === 'running' ? (
-        <>
-          <p className="match-summary">
-            {reviewers.length} reviewers · {papers.length} papers
-          </p>
-
-          <div className="match-actions">
-            <button
-              className="btn"
-              onClick={onRun}
-              disabled={!canRun}
-              title={
-                run
-                  ? 'Re-run the match with current settings (locked papers are preserved)'
-                  : 'Run the match using the current settings'
-              }
-            >
-              {status === 'running' ? 'Running…' : run ? 'Re-run match' : 'Run match'}
-            </button>
-          </div>
-        </>
-      ) : (
+      {run || status === 'running' ? null : (
         <div className="match-hero">
           <MatchHeroArt />
           <h3 className="match-hero__title">Ready to find your matches</h3>
@@ -84,10 +63,23 @@ export function MatchScreen() {
         </div>
       )}
 
-      {/* Status area: while running, the progress bar takes over the badges'
-          spot (same slot, fixed height) so the board below never jumps. */}
+      {/* One-row control bar: run button, then status (badges, or the progress
+          bar while running — same slot, fixed height, so the board never jumps),
+          with the data summary right-aligned. */}
       {(status === 'running' || run) && (
-        <div className="match-statusbar">
+        <div className="match-bar">
+          <button
+            className="btn"
+            onClick={onRun}
+            disabled={!canRun}
+            title={
+              run
+                ? 'Re-run the match with current settings (locked papers are preserved)'
+                : 'Run the match using the current settings'
+            }
+          >
+            {status === 'running' ? 'Running…' : run ? 'Re-run match' : 'Run match'}
+          </button>
           {status === 'running' ? (
             <div className="match-progress">
               <div className="match-progress__label">
@@ -142,6 +134,9 @@ export function MatchScreen() {
               </div>
             )
           )}
+          <span className="match-summary">
+            {reviewers.length} reviewers · {papers.length} papers
+          </span>
         </div>
       )}
       {status === 'error' && <p className="match-error">⚠️ {error}</p>}

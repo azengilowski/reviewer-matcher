@@ -92,6 +92,41 @@ body {
   border-radius: var(--r-sm);
 }
 
+/* Loaded-data counts, always visible next to the help button. */
+.app__counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: default;
+}
+.app__counts svg {
+  display: block;
+}
+.app__counts svg:not(:first-child) {
+  margin-left: 0.3rem;
+}
+/* The counts and help label are niceties; give the stepper the room on
+   narrow windows (the help button collapses to its icon). */
+@media (max-width: 1000px) {
+  .app__counts {
+    display: none;
+  }
+  .app__help-label {
+    display: none;
+  }
+  .app__help {
+    padding: 0.3rem 0.45rem;
+  }
+  .app__help svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
 .app__help {
   display: inline-flex;
   align-items: center;
@@ -118,7 +153,7 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: 1.1rem 1.5rem 1.5rem;
   max-width: 1100px;
   width: 100%;
   margin: 0 auto;
@@ -234,15 +269,29 @@ body {
 .export-card .btn {
   align-self: flex-start;
 }
-.screen__title {
-  margin: 0 0 0.35rem;
-  font-size: 1.5rem;
+/* Compact screen header: title (with optional sub-nav on its row), subtext
+   directly under it, tight margins throughout. */
+.screen__head {
+  margin-bottom: 0.9rem;
 }
-
+.screen__titlerow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.screen__title {
+  margin: 0;
+  font-size: 1.35rem;
+}
 .screen__intro {
-  margin: 0 0 1.25rem;
+  margin: 0.15rem 0 0;
   color: var(--muted);
-  max-width: 60ch;
+  font-size: 0.9rem;
+  max-width: 72ch;
+}
+.screen__nav {
+  margin-left: auto;
 }
 
 .debug-table {
@@ -413,8 +462,21 @@ body {
 }
 
 /* Match */
+/* One-row control bar: run button + status (badges or progress) + summary.
+   Fixed min-height so swapping badges/progress never shifts the board. */
+.match-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-height: 44px;
+  margin-bottom: 0.75rem;
+}
 .match-summary {
+  margin-left: auto;
   color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 /* Pre-run empty state: an inviting centered hero instead of a lone button. */
 .match-hero {
@@ -440,27 +502,9 @@ body {
   font-size: 0.92rem;
   line-height: 1.55;
 }
-.match-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-/* Fixed-height slot shared by the progress bar and the stats badges, so the
-   board below doesn't jump when a run starts or finishes. */
-.match-statusbar {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 2.75rem;
-  margin-bottom: 1rem;
-}
-.match-statusbar > * {
-  margin-bottom: 0;
-}
 .match-progress {
-  margin-bottom: 1rem;
+  flex: 1;
+  min-width: 240px;
   max-width: 420px;
 }
 .match-progress__label {
@@ -489,7 +533,6 @@ body {
   gap: 0.4rem;
   flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 1rem;
 }
 .badge {
   display: inline-flex;
@@ -1421,18 +1464,17 @@ details.warnings summary {
 .review-subnav {
   display: inline-flex;
   gap: 0.25rem;
-  margin: 0 0 1.25rem;
-  padding: 0.25rem;
+  padding: 0.2rem;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
 }
 .review-subtab {
-  padding: 0.35rem 0.9rem;
+  padding: 0.28rem 0.75rem;
   border-radius: var(--r-sm);
   text-decoration: none;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
 }
 .review-subtab:hover {
@@ -1443,6 +1485,18 @@ details.warnings summary {
   color: var(--accent);
   font-weight: 600;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+/* Reserve the bold width so toggling the active tab never shifts the row. */
+.review-subtab__label {
+  display: inline-flex;
+  flex-direction: column;
+}
+.review-subtab__label::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 600;
 }
 
 .detail-tabs {
@@ -1647,4 +1701,85 @@ code {
   padding: 0.05rem 0.3rem;
   border-radius: var(--r-sm);
   font-size: 0.85em;
+}
+
+/* Entry motion: board chips cascade in, dashboard bars grow, tiles rise.
+   All disabled by the global prefers-reduced-motion rule. */
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+.col .card {
+  animation: chip-in 0.3s ease backwards;
+}
+.col .card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.col .card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.col .card:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.col .card:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.col .card:nth-child(n + 6) {
+  animation-delay: 0.25s;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.barchart__fill {
+  transform-origin: left;
+  animation: bar-grow 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.barchart__row:nth-child(2) .barchart__fill {
+  animation-delay: 0.07s;
+}
+.barchart__row:nth-child(3) .barchart__fill {
+  animation-delay: 0.14s;
+}
+.barchart__row:nth-child(4) .barchart__fill {
+  animation-delay: 0.21s;
+}
+.barchart__row:nth-child(n + 5) .barchart__fill {
+  animation-delay: 0.28s;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.stat-tiles,
+.chart-grid,
+.chart-card {
+  animation: rise-in 0.3s ease backwards;
+}
+
+/* Compact empty state: illustration + one line + optional CTA. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.25rem 1rem 1.5rem;
+  animation: rise-in 0.3s ease backwards;
+}
+.empty__art {
+  width: 160px;
+  height: 96px;
+  margin-bottom: 0.5rem;
+}
+.empty__text {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
 }

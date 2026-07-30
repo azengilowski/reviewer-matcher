@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { computeDashboard, type Bar, type Pairing } from '../analytics/stats'
 import { useApp } from '../state/AppStore'
+import { EmptyState } from './EmptyState'
 import { ReviewSubnav } from './ReviewSubnav'
 import { ScreenShell } from './ScreenShell'
 
@@ -20,7 +21,12 @@ export function DashboardScreen() {
   if (!run || !stats || !autoStats) {
     return (
       <ScreenShell title="Match quality" intro="Run a match to see how well it went." nav={<ReviewSubnav />}>
-        <p className="muted">No match yet. Go to the Match tab and run one.</p>
+        <EmptyState
+          art="charts"
+          text="No match yet. Once you run one, its quality stats land here."
+          ctaTo="/match"
+          ctaLabel="Go to Match"
+        />
       </ScreenShell>
     )
   }

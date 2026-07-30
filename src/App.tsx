@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { AppStoreProvider } from './state/AppStore'
+import { AppStoreProvider, useApp } from './state/AppStore'
 import { HowItWorksModal } from './screens/HowItWorks'
 import { Stepper } from './screens/Stepper'
 import { StepFooter } from './screens/StepFooter'
@@ -22,6 +22,7 @@ export function App() {
 
 function AppShell() {
   const [showHelp, setShowHelp] = useState(false)
+  const { reviewers, papers } = useApp()
   const { pathname } = useLocation()
   const mainRef = useRef<HTMLElement>(null)
   // Reset the scroll container to the top whenever the view changes, so a new
@@ -53,6 +54,23 @@ function AppShell() {
           Reviewer Matcher
         </h1>
         <Stepper />
+        {(reviewers.length > 0 || papers.length > 0) && (
+          <span
+            className="app__counts"
+            title={`${reviewers.length} reviewers and ${papers.length} papers loaded`}
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21 a8 8 0 0 1 16 0" />
+            </svg>
+            {reviewers.length}
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M14 2 H6 a2 2 0 0 0 -2 2 v16 a2 2 0 0 0 2 2 h12 a2 2 0 0 0 2 -2 V8 z" />
+              <path d="M14 2 v6 h6" />
+            </svg>
+            {papers.length}
+          </span>
+        )}
         <button
           className="app__help"
           onClick={() => setShowHelp(true)}
@@ -73,7 +91,7 @@ function AppShell() {
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
-          How it works
+          <span className="app__help-label">How it works</span>
         </button>
       </header>
       {showHelp && <HowItWorksModal onClose={() => setShowHelp(false)} />}

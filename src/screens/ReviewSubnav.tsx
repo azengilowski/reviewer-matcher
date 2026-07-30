@@ -8,10 +8,14 @@ export function ReviewSubnav() {
   return (
     <nav className="review-subnav" aria-label="Review views">
       <NavLink to="/dashboard" className={cls}>
-        Overview
+        <span className="review-subtab__label" data-label="Overview">
+          Overview
+        </span>
       </NavLink>
       <NavLink to="/details" className={cls}>
-        Details
+        <span className="review-subtab__label" data-label="Details">
+          Details
+        </span>
       </NavLink>
     </nav>
   )
