@@ -121,6 +121,18 @@ body {
   border-color: var(--accent);
   color: var(--accent);
 }
+/* Reserve the bold width up front so the active weight never reflows the row. */
+.step__label {
+  display: inline-flex;
+  flex-direction: column;
+}
+.step__label::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 600;
+}
 .step--active .step__label {
   color: var(--text);
   font-weight: 600;

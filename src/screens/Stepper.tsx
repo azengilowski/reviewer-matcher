@@ -11,32 +11,37 @@ export function Stepper() {
   const hasRun = run != null
   const activeIndex = stepIndexFor(pathname)
 
-  const isDone = (to: string) =>
+  const isComplete = (to: string) =>
     to === '/upload' || to === '/settings' ? dataLoaded : hasRun
 
   return (
     <nav className="stepper" aria-label="Progress">
-      {STEPS.map((s, i) => (
-        <Fragment key={s.to}>
-          {i > 0 && (
-            <span className="step__sep" aria-hidden="true">
-              ›
-            </span>
-          )}
-          <Link
-            to={s.to}
-            className={
-              'step' + (i === activeIndex ? ' step--active' : '') + (isDone(s.to) ? ' step--done' : '')
-            }
-            aria-current={i === activeIndex ? 'step' : undefined}
-          >
-            <span className="step__marker" aria-hidden="true">
-              {isDone(s.to) ? '✓' : i + 1}
-            </span>
-            <span className="step__label">{s.label}</span>
-          </Link>
-        </Fragment>
-      ))}
+      {STEPS.map((s, i) => {
+        const active = i === activeIndex
+        // Only steps *before* the current one may show a check — never after it.
+        const done = i < activeIndex && isComplete(s.to)
+        return (
+          <Fragment key={s.to}>
+            {i > 0 && (
+              <span className="step__sep" aria-hidden="true">
+                ›
+              </span>
+            )}
+            <Link
+              to={s.to}
+              className={'step' + (active ? ' step--active' : '') + (done ? ' step--done' : '')}
+              aria-current={active ? 'step' : undefined}
+            >
+              <span className="step__marker" aria-hidden="true">
+                {done ? '✓' : i + 1}
+              </span>
+              <span className="step__label" data-label={s.label}>
+                {s.label}
+              </span>
+            </Link>
+          </Fragment>
+        )
+      })}
     </nav>
   )
 }
