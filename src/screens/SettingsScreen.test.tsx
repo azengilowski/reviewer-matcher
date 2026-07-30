@@ -40,7 +40,7 @@ describe('SettingsScreen', () => {
   it('edits the default paper capacity', () => {
     renderSettings()
     const cap = screen.getByLabelText(/reviewers per paper/i)
-    expect(cap).toHaveValue(2)
+    expect(cap).toHaveValue(4)
     fireEvent.change(cap, { target: { value: '3' } })
     expect(cap).toHaveValue(3)
   })

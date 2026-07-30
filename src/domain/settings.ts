@@ -1,10 +1,10 @@
 import { DEFAULT_MODEL } from '../similarity/models'
 import type { MatchSettings, Reviewer, Paper } from './types'
 
-/** Default settings per SPEC §4.3 (paper capacity 2, papers propose). */
+/** Default settings (paper capacity 4, papers propose). */
 export const DEFAULT_SETTINGS: MatchSettings = {
-  paperCapacity: 2,
-  loadsByRole: { student: 6, professor: 4, other: 4 },
+  paperCapacity: 4,
+  loadsByRole: { student: 2, professor: 4, other: 4 },
   defaultLoad: 4,
   proposingSide: 'papers',
   seed: 'reviewer-matcher',

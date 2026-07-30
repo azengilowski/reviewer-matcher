@@ -27,7 +27,7 @@ export interface Paper {
 }
 
 export interface MatchSettings {
-  /** Reviewers needed per paper (SPEC §4.3, default 2). */
+  /** Reviewers needed per paper (default 4). */
   paperCapacity: number
   /** Max papers per reviewer, keyed by role. */
   loadsByRole: Record<string, number>
