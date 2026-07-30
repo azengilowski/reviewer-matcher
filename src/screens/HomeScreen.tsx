@@ -79,12 +79,14 @@ function PointIcon({ kind }: { kind: 'lock' | 'spark' | 'hand' }) {
   }
   return (
     <svg
+      className="home__pointicon"
       viewBox="0 0 24 24"
-      width="16"
-      height="16"
+      width="17"
+      height="17"
       fill="none"
       stroke="var(--accent)"
-      strokeWidth="1.8"
+      // Heavier stroke so the line icons carry the weight of the bold labels.
+      strokeWidth="2.6"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
