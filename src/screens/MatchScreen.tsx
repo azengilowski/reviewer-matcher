@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { downloadText } from '../io/download'
 import { exportResultsCsv } from '../io/exportResults'
 import { exportReportCsv } from '../io/reportExport'
@@ -10,19 +10,22 @@ export function MatchScreen() {
   const { reviewers, papers, settings, run, assignments, lockedPapers, status, error, progress, runMatching } =
     useApp()
   const canRun = reviewers.length > 0 && papers.length > 0 && status !== 'running'
+  // When re-running would discard unlocked manual edits, ask first (in-app modal,
+  // not a native window.confirm which browsers can suppress). null = no dialog.
+  const [pendingReRun, setPendingReRun] = useState<number | null>(null)
 
-  // Re-running replaces assignments on unlocked papers; warn if that discards edits.
   function onRun() {
     const unlockedManualEdits = assignments.filter(
       (a) => a.source === 'manual' && !lockedPapers.includes(a.paperId),
     ).length
     if (run && unlockedManualEdits > 0) {
-      const ok = window.confirm(
-        `Re-running replaces assignments on unlocked papers, discarding ${unlockedManualEdits} manual edit(s). ` +
-          `Locked papers are kept. Continue?`,
-      )
-      if (!ok) return
+      setPendingReRun(unlockedManualEdits)
+      return
     }
+    void runMatching()
+  }
+  function confirmReRun() {
+    setPendingReRun(null)
     void runMatching()
   }
   const stale = run != null && JSON.stringify(run.settings) !== JSON.stringify(settings)
@@ -147,6 +150,37 @@ export function MatchScreen() {
 
           <BoardView run={run} />
         </>
+      )}
+
+      {pendingReRun != null && (
+        <div className="modal-backdrop" onClick={() => setPendingReRun(null)}>
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Confirm re-run"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal__head">
+              <strong>Re-run match?</strong>
+              <button className="modal__close" onClick={() => setPendingReRun(null)} aria-label="Close">
+                ×
+              </button>
+            </div>
+            <p className="modal__hint">
+              This replaces assignments on unlocked papers, discarding {pendingReRun} manual
+              edit(s). Locked papers are kept.
+            </p>
+            <div className="modal__foot">
+              <button className="btn btn--ghost" onClick={() => setPendingReRun(null)}>
+                Cancel
+              </button>
+              <button className="btn" onClick={confirmReRun}>
+                Re-run match
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </ScreenShell>
   )
