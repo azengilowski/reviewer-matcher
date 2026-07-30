@@ -478,6 +478,7 @@ details.warnings summary {
 .settings-role input,
 .overrides-row input {
   width: 5rem;
+  flex-shrink: 0;
   padding: 0.3rem 0.4rem;
   border: 1px solid var(--border);
   border-radius: 5px;
@@ -604,6 +605,8 @@ details.warnings summary {
   border-bottom: 1px solid var(--border);
 }
 .overrides-row span {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
