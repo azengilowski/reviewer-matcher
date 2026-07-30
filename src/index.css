@@ -705,6 +705,39 @@ details.warnings summary {
   border-color: var(--accent);
   background: var(--accent-weak);
 }
+.col--dropping-blocked {
+  border-color: #c0392b;
+  box-shadow: inset 0 0 0 1px #c0392b;
+  cursor: not-allowed;
+}
+
+/* Transient rejection toast */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #26262c;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 200;
+  max-width: min(90vw, 460px);
+  animation: toast-in 0.16s ease-out;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
 .col__head {
   display: flex;
   align-items: center;

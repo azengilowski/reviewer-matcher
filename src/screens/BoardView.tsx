@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   DndContext,
@@ -110,6 +110,16 @@ export function BoardView({ run }: { run: MatchRun }) {
   // Name shown in the floating drag preview that follows the cursor.
   const [activeName, setActiveName] = useState<string | null>(null)
 
+  // Transient toast explaining why a drop was rejected.
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  function showToast(message: string) {
+    setToast(message)
+    clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(null), 3500)
+  }
+  useEffect(() => () => clearTimeout(toastTimer.current), [])
+
   function onDragStart(event: DragStartEvent) {
     const { reviewerId } = parseDrag(String(event.active.id))
     setActiveName(nameById.get(reviewerId) ?? reviewerId)
@@ -142,18 +152,34 @@ export function BoardView({ run }: { run: MatchRun }) {
     const target = String(event.over.id)
     const sourcePaperId = source === UNASSIGNED ? null : source
     const targetPaperId = target === UNASSIGNED ? null : target
-    // Locked papers can't gain or lose reviewers via drag.
-    if ((sourcePaperId && lockedSet.has(sourcePaperId)) || (targetPaperId && lockedSet.has(targetPaperId))) {
+    const name = nameById.get(reviewerId) ?? reviewerId
+
+    // Explain the common rejections with a toast (checked before the same-paper
+    // no-op, so dropping a reviewer back onto a paper they're on still explains it).
+    if (targetPaperId && lockedSet.has(targetPaperId)) {
+      showToast(`Paper ${targetPaperId} is locked — unlock it to change its reviewers.`)
       return
     }
-    const name = nameById.get(reviewerId) ?? reviewerId
+    if (
+      targetPaperId &&
+      assignments.some((a) => a.paperId === targetPaperId && a.reviewerId === reviewerId)
+    ) {
+      showToast(`${name} is already assigned to paper ${targetPaperId}.`)
+      return
+    }
+
+    // Otherwise nothing to do (e.g. dropped back in the tray it came from).
+    if (sourcePaperId === targetPaperId) return
 
     let result = computeMove(assignments, run, name, sourcePaperId, reviewerId, targetPaperId)
     if (result === 'conflict') {
       const reason = window.prompt(
         `${name} is a self-authorship conflict on paper ${targetPaperId}. Type a reason to override, or Cancel.`,
       )
-      if (!reason) return
+      if (!reason) {
+        showToast(`${name} not added — self-authorship conflict on paper ${targetPaperId}.`)
+        return
+      }
       result = computeMove(assignments, run, name, sourcePaperId, reviewerId, targetPaperId, {
         overrideConflict: true,
         reason,
@@ -407,6 +433,12 @@ export function BoardView({ run }: { run: MatchRun }) {
           onAdd={(ids) => addReviewers(addingPaperId, ids)}
         />
       )}
+
+      {toast && (
+        <div className="toast" role="status" aria-live="polite">
+          {toast}
+        </div>
+      )}
     </DndContext>
   )
 }
@@ -582,13 +614,14 @@ function Column({
   tray?: boolean
   locked?: boolean
 }) {
-  // Locked columns don't accept drops.
-  const { setNodeRef, isOver } = useDroppable({ id, disabled: locked })
+  // Locked columns still register the drop (so we can explain the rejection),
+  // but show a "blocked" cue rather than the accepting highlight.
+  const { setNodeRef, isOver } = useDroppable({ id })
   const cls = ['col']
   if (tray) cls.push('col--tray')
   if (locked) cls.push('col--locked')
   if (over) cls.push('col--overcap')
-  if (isOver) cls.push('col--dropping')
+  if (isOver) cls.push(locked ? 'col--dropping-blocked' : 'col--dropping')
   return (
     <div ref={setNodeRef} className={cls.join(' ')}>
       {children}
