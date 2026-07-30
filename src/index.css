@@ -352,6 +352,18 @@ body {
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
+/* Fixed-height slot shared by the progress bar and the stats badges, so the
+   board below doesn't jump when a run starts or finishes. */
+.match-statusbar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 2.75rem;
+  margin-bottom: 1rem;
+}
+.match-statusbar > * {
+  margin-bottom: 0;
+}
 .match-progress {
   margin-bottom: 1rem;
   max-width: 420px;

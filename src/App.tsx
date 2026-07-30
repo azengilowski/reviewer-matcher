@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AppStoreProvider } from './state/AppStore'
 import { HowItWorksModal } from './screens/HowItWorks'
 import { Stepper } from './screens/Stepper'
@@ -22,6 +22,13 @@ export function App() {
 
 function AppShell() {
   const [showHelp, setShowHelp] = useState(false)
+  const { pathname } = useLocation()
+  const mainRef = useRef<HTMLElement>(null)
+  // Reset the scroll container to the top whenever the view changes, so a new
+  // screen never opens partway down where the last one was scrolled to.
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = 0
+  }, [pathname])
   return (
     <div className="app">
       <header className="app__header">
@@ -51,7 +58,7 @@ function AppShell() {
         </button>
       </header>
       {showHelp && <HowItWorksModal onClose={() => setShowHelp(false)} />}
-      <main className="app__main">
+      <main className="app__main" ref={mainRef}>
         <Routes>
           <Route path="/" element={<Navigate to="/upload" replace />} />
           <Route path="/upload" element={<UploadScreen />} />

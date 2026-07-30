@@ -62,23 +62,64 @@ export function MatchScreen() {
         </button>
       </div>
 
-      {status === 'running' && progress && (
-        <div className="match-progress">
-          <div className="match-progress__label">
-            {progress.phase === 'download'
-              ? progress.total > 0
-                ? `Downloading matching model… ${Math.round((progress.loaded / progress.total) * 100)}% (one-time, then cached)`
-                : 'Loading matching model (first run downloads once, then cached)…'
-              : `Embedding & matching… ${progress.loaded}/${progress.total}`}
-          </div>
-          <div className="progressbar">
-            <div
-              className="progressbar__fill"
-              style={{
-                width: `${progress.total > 0 ? Math.round((progress.loaded / progress.total) * 100) : 5}%`,
-              }}
-            />
-          </div>
+      {/* Status area: while running, the progress bar takes over the badges'
+          spot (same slot, fixed height) so the board below never jumps. */}
+      {(status === 'running' || run) && (
+        <div className="match-statusbar">
+          {status === 'running' ? (
+            <div className="match-progress">
+              <div className="match-progress__label">
+                {progress?.phase === 'download'
+                  ? progress.total > 0
+                    ? `Downloading matching model… ${Math.round((progress.loaded / progress.total) * 100)}% (one-time, then cached)`
+                    : 'Loading matching model (first run downloads once, then cached)…'
+                  : progress
+                    ? `Embedding & matching… ${progress.loaded}/${progress.total}`
+                    : 'Starting…'}
+              </div>
+              <div className="progressbar">
+                <div
+                  className="progressbar__fill"
+                  style={{
+                    width: `${progress && progress.total > 0 ? Math.round((progress.loaded / progress.total) * 100) : 5}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            run && (
+              <div className="match-stats">
+                <span
+                  className={run.stable ? 'badge badge--ok' : 'badge badge--warn'}
+                  title={
+                    run.stable
+                      ? 'Stable: no paper and reviewer both prefer each other over their current match'
+                      : 'Not stable: a paper and reviewer would both rather be matched together'
+                  }
+                >
+                  {run.stable ? 'Stable ✓' : 'Not stable'}
+                </span>
+                <span className="badge" title="Total reviewer–paper assignments">
+                  {stats.count} assignments
+                </span>
+                {stats.manual > 0 && (
+                  <span className="badge" title="Assignments you changed by hand (drag, add, or remove)">
+                    {stats.manual} manual
+                  </span>
+                )}
+                {stats.unfilledPapers > 0 && (
+                  <span className="badge badge--warn" title="Papers with fewer reviewers than their capacity">
+                    {stats.unfilledPapers} papers unfilled
+                  </span>
+                )}
+                {stats.idleReviewers > 0 && (
+                  <span className="badge" title="Reviewers with no assigned papers">
+                    {stats.idleReviewers} reviewers idle
+                  </span>
+                )}
+              </div>
+            )
+          )}
         </div>
       )}
       {status === 'error' && <p className="match-error">⚠️ {error}</p>}
@@ -86,42 +127,7 @@ export function MatchScreen() {
         <p className="match-stale">⚠️ Settings changed since this match. Re-run to apply them.</p>
       )}
 
-      {run && (
-        <>
-          <div className="match-stats">
-            <span
-              className={run.stable ? 'badge badge--ok' : 'badge badge--warn'}
-              title={
-                run.stable
-                  ? 'Stable: no paper and reviewer both prefer each other over their current match'
-                  : 'Not stable: a paper and reviewer would both rather be matched together'
-              }
-            >
-              {run.stable ? 'Stable ✓' : 'Not stable'}
-            </span>
-            <span className="badge" title="Total reviewer–paper assignments">
-              {stats.count} assignments
-            </span>
-            {stats.manual > 0 && (
-              <span className="badge" title="Assignments you changed by hand (drag, add, or remove)">
-                {stats.manual} manual
-              </span>
-            )}
-            {stats.unfilledPapers > 0 && (
-              <span className="badge badge--warn" title="Papers with fewer reviewers than their capacity">
-                {stats.unfilledPapers} papers unfilled
-              </span>
-            )}
-            {stats.idleReviewers > 0 && (
-              <span className="badge" title="Reviewers with no assigned papers">
-                {stats.idleReviewers} reviewers idle
-              </span>
-            )}
-          </div>
-
-          <BoardView run={run} />
-        </>
-      )}
+      {run && <BoardView run={run} />}
 
       {pendingReRun != null && (
         <div className="modal-backdrop" onClick={() => setPendingReRun(null)}>
