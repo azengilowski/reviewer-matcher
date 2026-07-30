@@ -15,9 +15,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'Reviewer Matcher',
-        short_name: 'Matcher',
-        description: 'Match academic reviewers to papers — runs entirely in your browser.',
+        name: 'Peerfect Match',
+        short_name: 'Peerfect',
+        description: 'Match academic reviewers to papers. Runs entirely in your browser.',
         theme_color: '#2f5fe0',
         background_color: '#f7f7f8',
         display: 'standalone',

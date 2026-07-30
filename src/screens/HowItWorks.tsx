@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { Wordmark } from './Logo'
 
 /** Modal explaining privacy, embeddings, matching, and import/export,
  *  in plain language, with a small diagram for each idea. */
@@ -19,11 +20,13 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
         className="modal modal--wide"
         role="dialog"
         aria-modal="true"
-        aria-label="How Reviewer Matcher works"
+        aria-label="How Peerfect Match works"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal__head">
-          <strong>How Reviewer Matcher works</strong>
+          <strong>
+            How <Wordmark /> works
+          </strong>
           <button className="modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
@@ -75,7 +78,7 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
               keeping each reviewer's workload sensible. The result is <em>stable</em>: there's no
               paper-and-reviewer pair who'd both secretly rather have been matched with each other.
               And nobody is ever handed their own paper to review. You hold the dials: capacities,
-              workloads, and more all live in Settings.
+              workloads, and more all live in the Configure step.
             </p>
             <figure className="prose__figure">
               <MatchDiagram />
@@ -338,12 +341,12 @@ function IoDiagram() {
       className="prose__svg"
       viewBox="0 0 520 150"
       role="img"
-      aria-label="CSV and Excel files flow into Reviewer Matcher; assignments, a report, and a project file flow out."
+      aria-label="CSV and Excel files flow into Peerfect Match; assignments, a report, and a project file flow out."
     >
       {/* app */}
       <rect x="196" y="42" width="128" height="66" rx="12" fill="var(--accent)" />
-      <text x="260" y="72" textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">Reviewer</text>
-      <text x="260" y="90" textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">Matcher</text>
+      <text x="260" y="72" textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">Peerfect</text>
+      <text x="260" y="90" textAnchor="middle" fontSize="12" fontWeight="700" fill="#fff">Match</text>
       {/* in */}
       {inFile(40, 'CSV')}
       {inFile(84, 'Excel')}

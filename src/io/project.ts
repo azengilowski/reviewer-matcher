@@ -69,7 +69,7 @@ export function parseProject(json: string): ParseResult {
   }
   const p = data as Partial<ProjectFile>
   if (p.app !== 'reviewer-matcher') {
-    return { ok: false, error: 'This file was not created by Reviewer Matcher.' }
+    return { ok: false, error: 'This file was not created by Peerfect Match.' }
   }
   if (p.schemaVersion !== PROJECT_SCHEMA_VERSION) {
     return {

@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS: MatchSettings = {
   loadsByRole: { student: 2, professor: 4, other: 4 },
   defaultLoad: 4,
   proposingSide: 'papers',
-  seed: 'reviewer-matcher',
+  seed: 'peerfect-match',
   excludeSelfAuthorship: true,
   methodBoost: 0,
   minLoad: 0,

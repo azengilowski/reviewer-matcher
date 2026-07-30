@@ -23,7 +23,7 @@ export function ExportScreen() {
       auditLog,
       runHistory,
     })
-    downloadText('reviewer-match.matchproj', json, 'application/json')
+    downloadText('peerfect-match.matchproj', json, 'application/json')
   }
   function exportResults() {
     downloadText('reviewer-assignments.csv', exportResultsCsv(assignments, papers, reviewers))

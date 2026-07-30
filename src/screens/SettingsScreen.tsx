@@ -46,7 +46,7 @@ export function SettingsScreen() {
 
   return (
     <ScreenShell
-      title="Settings"
+      title="Configure"
       intro="Configure how the match runs. Changes apply to the next run."
     >
       <div className="settings-topbar">

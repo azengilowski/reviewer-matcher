@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../state/AppStore'
 import { HowItWorksModal } from './HowItWorks'
-import { Logo } from './Logo'
+import { Logo, Wordmark } from './Logo'
 
 /** Landing screen: name, logo, a one-line pitch, and the two ways in. */
 export function HomeScreen() {
@@ -13,7 +13,9 @@ export function HomeScreen() {
   return (
     <div className="home">
       <Logo size={72} />
-      <h2 className="home__title">Reviewer Matcher</h2>
+      <h2 className="home__title">
+        <Wordmark />
+      </h2>
       <p className="home__tagline">
         Match academic reviewers to papers with in-browser AI. Nothing is uploaded: your data never
         leaves your device.

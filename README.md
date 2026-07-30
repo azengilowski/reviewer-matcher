@@ -1,4 +1,4 @@
-# Reviewer Matcher
+# Peerfect Match
 
 A client-side web app that matches academic reviewers to papers/proposals using a
 stable-marriage (deferred-acceptance) algorithm, then lets you inspect, understand,

@@ -1,4 +1,13 @@
-/** The app's network mark (papers linked to reviewers), reusable at any size. */
+/** The brand wordmark: italic "Peer", so the pun lands on sight. */
+export function Wordmark() {
+  return (
+    <span className="wordmark">
+      <em>Peer</em>fect Match
+    </span>
+  )
+}
+
+/** Peerfect Match mark: a heart stamped with an approval check. */
 export function Logo({ size = 22 }: { size?: number }) {
   return (
     <svg
@@ -10,14 +19,18 @@ export function Logo({ size = 22 }: { size?: number }) {
       aria-hidden="true"
     >
       <rect width="512" height="512" rx="112" fill="var(--accent)" />
-      <g fill="none" stroke="#fff" strokeWidth="34" strokeLinecap="round">
-        <circle cx="168" cy="150" r="46" />
-        <circle cx="168" cy="362" r="46" />
-        <circle cx="344" cy="256" r="46" />
-        <path d="M168 196 v120" />
-        <path d="M206 172 L306 236" />
-        <path d="M206 340 L306 276" />
-      </g>
+      <path
+        d="M256 440 C 140 355 88 285 88 208 a 92 92 0 0 1 168 -52 a 92 92 0 0 1 168 52 c 0 77 -52 147 -168 232 z"
+        fill="#fff"
+      />
+      <path
+        d="M196 262 l 44 44 82 -84"
+        fill="none"
+        stroke="var(--accent)"
+        strokeWidth="36"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }

@@ -43,7 +43,7 @@ export function deferredAcceptance(
   receivers: Party[],
   options: MatchOptions = {},
 ): MatchResult {
-  const rng = seedrandom(options.seed ?? 'reviewer-matcher')
+  const rng = seedrandom(options.seed ?? 'peerfect-match')
 
   const proposerById = new Map(proposers.map((p) => [p.id, p]))
   const receiverById = new Map(receivers.map((r) => [r.id, r]))

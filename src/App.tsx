@@ -3,7 +3,7 @@ import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-r
 import { AppStoreProvider, useApp } from './state/AppStore'
 import { HomeScreen } from './screens/HomeScreen'
 import { HowItWorksModal } from './screens/HowItWorks'
-import { Logo } from './screens/Logo'
+import { Logo, Wordmark } from './screens/Logo'
 import { Stepper } from './screens/Stepper'
 import { StepFooter } from './screens/StepFooter'
 import { UploadScreen } from './screens/UploadScreen'
@@ -40,7 +40,7 @@ function AppShell() {
         <h1 className="app__title">
           <Link to="/" className="app__homelink" title="Home">
             <Logo />
-            Reviewer Matcher
+            <Wordmark />
           </Link>
         </h1>
         <Stepper />

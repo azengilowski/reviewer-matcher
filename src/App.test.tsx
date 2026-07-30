@@ -13,15 +13,17 @@ function renderAt(path: string) {
 describe('App shell', () => {
   it('renders the app title and all nav links', () => {
     renderAt('/')
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Reviewer Matcher')
-    for (const label of ['Upload', 'Settings', 'Match', 'Review', 'Export']) {
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Peerfect Match')
+    for (const label of ['Upload', 'Configure', 'Match', 'Review', 'Export']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
   })
 
   it('shows the home screen at the index route, with a way in', () => {
     renderAt('/')
-    expect(screen.getByRole('heading', { level: 2, name: 'Reviewer Matcher' })).toBeInTheDocument()
+    // The wordmark renders as <em>Peer</em>fect Match; accessible-name
+    // computation may inject spaces around the <em>, so match loosely.
+    expect(screen.getByRole('heading', { level: 2, name: /peer\s*fect match/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /get started/i })).toHaveAttribute('href', '/upload')
     // Both the header and the hero offer "How it works".
     expect(screen.getAllByRole('button', { name: /how it works|how this app works/i }).length)
