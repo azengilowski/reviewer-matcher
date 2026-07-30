@@ -1,4 +1,4 @@
-/** The brand wordmark: italic "Peer", so the pun lands on sight. */
+/** The brand wordmark: script "Peer" against the upright grotesk. */
 export function Wordmark() {
   return (
     <span className="wordmark">
@@ -7,8 +7,15 @@ export function Wordmark() {
   )
 }
 
-/** Peerfect Match mark: a heart stamped with an approval check. */
+/**
+ * Peerfect Match mark: two overlapping rings whose shared lens is the match,
+ * on the same blue-to-pink gradient as the wordmark.
+ */
 export function Logo({ size = 22 }: { size?: number }) {
+  // Unique ids per size so multiple logos can coexist on one page.
+  const gid = `logo-grad-${size}`
+  const cid = `logo-clip-${size}`
+  const mid = `logo-mask-${size}`
   return (
     <svg
       className="logo"
@@ -18,19 +25,27 @@ export function Logo({ size = 22 }: { size?: number }) {
       style={{ borderRadius: Math.max(4, Math.round(size * 0.22)) }}
       aria-hidden="true"
     >
-      <rect width="512" height="512" rx="112" fill="var(--accent)" />
-      <path
-        d="M256 440 C 140 355 88 285 88 208 a 92 92 0 0 1 168 -52 a 92 92 0 0 1 168 52 c 0 77 -52 147 -168 232 z"
-        fill="#fff"
-      />
-      <path
-        d="M196 262 l 44 44 82 -84"
-        fill="none"
-        stroke="var(--accent)"
-        strokeWidth="36"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#2f5fe0" />
+          <stop offset="55%" stopColor="#7a4de8" />
+          <stop offset="100%" stopColor="#e0457b" />
+        </linearGradient>
+        {/* Two solid lobes with their shared lens knocked out, so the overlap
+            reads as the match. Solid shapes stay legible at favicon sizes. */}
+        <clipPath id={cid}>
+          <circle cx="198" cy="256" r="104" />
+        </clipPath>
+        <mask id={mid}>
+          <circle cx="198" cy="256" r="104" fill="#fff" />
+          <circle cx="314" cy="256" r="104" fill="#fff" />
+          <g clipPath={`url(#${cid})`}>
+            <circle cx="314" cy="256" r="104" fill="#000" />
+          </g>
+        </mask>
+      </defs>
+      <rect width="512" height="512" rx="112" fill={`url(#${gid})`} />
+      <rect width="512" height="512" fill="#fff" mask={`url(#${mid})`} />
     </svg>
   )
 }

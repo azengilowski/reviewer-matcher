@@ -125,7 +125,7 @@ function AppShell() {
                 onClick={() => {
                   resetApp()
                   setShowReset(false)
-                  navigate('/upload')
+                  navigate('/')
                 }}
               >
                 Reset everything

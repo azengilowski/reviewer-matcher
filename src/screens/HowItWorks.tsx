@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { LockIcon } from './Icons'
 import { Wordmark } from './Logo'
 
 /** Modal explaining privacy, embeddings, matching, and import/export,
@@ -39,7 +40,10 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
           </p>
 
           <section>
-            <h4>🔒 It all happens on your computer</h4>
+            <h4>
+              <LockIcon />
+              It all happens on your computer
+            </h4>
             <p>
               Good news first: there's no server, no sign-up, and nothing to upload. Your reviewers
               and papers stay right here in this browser tab, where we read them, do the matching,

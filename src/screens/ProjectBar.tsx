@@ -2,26 +2,33 @@ import { useState } from 'react'
 import { parseProject } from '../io/project'
 import { importResultsCsv, type ResolutionReport } from '../io/resultsImport'
 import { useApp } from '../state/AppStore'
+import { WarningIcon } from './Icons'
 
 export function ProjectBar() {
   const { reviewers, papers, run, loadProject, commitAssignments } = useApp()
-  const [message, setMessage] = useState<string | null>(null)
+  const [message, setMessage] = useState<{ kind: 'warn' | 'ok'; text: string } | null>(null)
   const [report, setReport] = useState<ResolutionReport | null>(null)
 
   async function onProjectFile(file: File) {
     const result = parseProject(await file.text())
     if (!result.ok) {
-      setMessage(`⚠️ ${result.error}`)
+      setMessage({ kind: 'warn', text: result.error })
       return
     }
     loadProject(result.project)
-    setMessage(`✓ Loaded project: ${result.project.reviewers.length} reviewers, ${result.project.papers.length} papers.`)
+    setMessage({
+      kind: 'ok',
+      text: `Loaded project: ${result.project.reviewers.length} reviewers, ${result.project.papers.length} papers.`,
+    })
     setReport(null)
   }
 
   async function onResultsFile(file: File) {
     if (reviewers.length === 0 || papers.length === 0) {
-      setMessage('⚠️ Load reviewers and papers first: results are matched against them by name.')
+      setMessage({
+        kind: 'warn',
+        text: 'Load reviewers and papers first: results are matched against them by name.',
+      })
       return
     }
     const rep = importResultsCsv(await file.text(), reviewers, papers, run)
@@ -62,18 +69,24 @@ export function ProjectBar() {
         }}
       />
 
-      {message && <p className="projectbar__msg">{message}</p>}
+      {message && (
+        <p className="projectbar__msg">
+          {message.kind === 'warn' ? <WarningIcon /> : '✓'} {message.text}
+        </p>
+      )}
 
       {report && (
         <div className="projectbar__report">
           ✓ Imported {report.assignments.length} assignments ({report.matchedPapers} papers,{' '}
           {report.matchedReviewers} reviewers).
           {report.unresolvedPapers.length > 0 && (
-            <div>⚠️ Unmatched columns: {report.unresolvedPapers.join(', ')}</div>
+            <div>
+              <WarningIcon /> Unmatched columns: {report.unresolvedPapers.join(', ')}
+            </div>
           )}
           {report.unresolvedReviewers.length > 0 && (
             <div>
-              ⚠️ Unmatched reviewer names ({report.unresolvedReviewers.length}):{' '}
+              <WarningIcon /> Unmatched reviewer names ({report.unresolvedReviewers.length}):{' '}
               {report.unresolvedReviewers.slice(0, 8).join(', ')}
               {report.unresolvedReviewers.length > 8 ? '…' : ''}
             </div>

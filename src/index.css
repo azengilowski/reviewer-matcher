@@ -17,8 +17,22 @@
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Brand wordmark: display font, gradient ink (brand blue into heart pink),
-   with "Peer" italicized so the pun lands. */
+/* Flat inline icons: sit on the text baseline, inherit the surrounding color. */
+.icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
+}
+.icon--warn {
+  color: #b8860b;
+}
+.prose h4 .icon--lock {
+  color: #1a7f37;
+  margin-right: 0.35rem;
+}
+
+/* Brand wordmark: display font, gradient ink (brand blue into pink),
+   with "Peer" set in script so the pun lands. */
 .wordmark {
   font-family: var(--font-display);
   font-weight: 700;
@@ -35,7 +49,13 @@
   }
 }
 .wordmark em {
-  font-style: italic;
+  /* "Peer" in a curly script against the upright grotesk. Pacifico is already
+     slanted, so no synthetic italic; slight size/space tuning to sit well. */
+  font-family: 'Pacifico', cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 0.98em;
+  margin-right: 0.09em;
 }
 
 /* One keyboard-focus treatment everywhere. */
@@ -375,13 +395,22 @@ body {
 }
 .home__points li {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.55rem;
   font-size: 0.9rem;
   color: var(--muted);
+  text-align: left;
+}
+.home__points strong {
+  color: var(--text);
 }
 .home__points svg {
   flex-shrink: 0;
+}
+
+/* Every step screen fades up on entry, matching the home and empty states. */
+.screen {
+  animation: rise-in 0.3s ease backwards;
 }
 
 /* Compact screen header: title (with optional sub-nav on its row), subtext
@@ -389,16 +418,20 @@ body {
 .screen__head {
   margin-bottom: 0.9rem;
 }
+/* Fixed row height so the title sits the same distance below the app header on
+   every screen, whether or not a (taller) sub-nav shares its row. */
 .screen__titlerow {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  min-height: 36px;
 }
 .screen__title {
   margin: 0;
   font-size: 1.35rem;
   font-family: var(--font-display);
+  line-height: 1.2;
 }
 .screen__intro {
   margin: 0.15rem 0 0;
@@ -624,7 +657,14 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 3rem 1rem 2rem;
+  padding: 2.25rem 1rem 1.5rem;
+  animation: rise-in 0.3s ease backwards;
+}
+.match-hero__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .match-hero__art {
   width: 220px;

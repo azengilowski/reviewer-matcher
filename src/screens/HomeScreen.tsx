@@ -33,15 +33,21 @@ export function HomeScreen() {
       <ul className="home__points">
         <li>
           <PointIcon kind="lock" />
-          Private by design: runs entirely in your browser
+          <span>
+            <strong>Private by design:</strong> runs entirely in your browser
+          </span>
         </li>
         <li>
           <PointIcon kind="spark" />
-          Smart matching by topic, with a fair, stable algorithm
+          <span>
+            <strong>Smart matching:</strong> by topic, with a fair, stable algorithm
+          </span>
         </li>
         <li>
           <PointIcon kind="hand" />
-          You stay in control: drag, lock, and undo any assignment
+          <span>
+            <strong>You stay in control:</strong> drag, lock, and undo any assignment
+          </span>
         </li>
       </ul>
 

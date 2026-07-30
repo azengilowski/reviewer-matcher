@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useApp } from '../state/AppStore'
 import { BoardView } from './BoardView'
 import { ScreenShell } from './ScreenShell'
@@ -7,6 +8,7 @@ export function MatchScreen() {
   const { reviewers, papers, settings, run, assignments, lockedPapers, status, error, progress, runMatching } =
     useApp()
   const canRun = reviewers.length > 0 && papers.length > 0 && status !== 'running'
+  const hasData = reviewers.length > 0 && papers.length > 0
   // When re-running would discard unlocked manual edits, ask first (in-app modal,
   // not a native window.confirm which browsers can suppress). null = no dialog.
   const [pendingReRun, setPendingReRun] = useState<number | null>(null)
@@ -46,20 +48,30 @@ export function MatchScreen() {
       {run || status === 'running' ? null : (
         <div className="match-hero">
           <MatchHeroArt />
-          <h3 className="match-hero__title">Ready to find your matches</h3>
+          <h3 className="match-hero__title">
+            {hasData ? 'Ready to find your matches' : 'Nothing to match yet'}
+          </h3>
           <p className="match-hero__sub">
-            {reviewers.length > 0 && papers.length > 0
+            {hasData
               ? `${reviewers.length} reviewers and ${papers.length} papers are loaded. The matcher pairs every paper with its best-fit reviewers; you can fine-tune the board afterwards.`
-              : 'Import reviewers and papers on the Upload step, then come back to run the match.'}
+              : 'Import your reviewers and papers first, then come back here to run the match.'}
           </p>
-          <button
-            className="btn"
-            onClick={onRun}
-            disabled={!canRun}
-            title="Run the match using the current settings"
-          >
-            Run match
-          </button>
+          <div className="match-hero__actions">
+            {hasData ? (
+              <button
+                className="btn"
+                onClick={onRun}
+                disabled={!canRun}
+                title="Run the match using the current settings"
+              >
+                Run match
+              </button>
+            ) : (
+              <Link className="btn" to="/upload">
+                Go to Upload →
+              </Link>
+            )}
+          </div>
         </div>
       )}
 

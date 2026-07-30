@@ -1,5 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="112" fill="#2f5fe0" />
-  <path d="M256 440 C 140 355 88 285 88 208 a 92 92 0 0 1 168 -52 a 92 92 0 0 1 168 52 c 0 77 -52 147 -168 232 z" fill="#ffffff" />
-  <path d="M196 262 l 44 44 82 -84" fill="none" stroke="#2f5fe0" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" />
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2f5fe0" />
+      <stop offset="55%" stop-color="#7a4de8" />
+      <stop offset="100%" stop-color="#e0457b" />
+    </linearGradient>
+    <clipPath id="c">
+      <circle cx="198" cy="256" r="104" />
+    </clipPath>
+    <mask id="m">
+      <circle cx="198" cy="256" r="104" fill="#ffffff" />
+      <circle cx="314" cy="256" r="104" fill="#ffffff" />
+      <g clip-path="url(#c)">
+        <circle cx="314" cy="256" r="104" fill="#000000" />
+      </g>
+    </mask>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)" />
+  <rect width="512" height="512" fill="#ffffff" mask="url(#m)" />
 </svg>

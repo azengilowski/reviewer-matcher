@@ -8,6 +8,7 @@ import {
 import { parseDelimited } from '../io/readTable'
 import type { Paper, Reviewer } from '../domain/types'
 import { useApp } from '../state/AppStore'
+import { WarningIcon } from './Icons'
 import { ImportWizard } from './ImportWizard'
 import { ProjectBar } from './ProjectBar'
 import { ScreenShell } from './ScreenShell'
@@ -165,7 +166,9 @@ export function UploadScreen() {
           <summary>{warnings.length} import warning(s)</summary>
           <ul aria-label="Import warnings">
             {warnings.slice(0, 20).map((w, i) => (
-              <li key={i}>⚠️ {w}</li>
+              <li key={i}>
+                <WarningIcon /> {w}
+              </li>
             ))}
           </ul>
         </details>

@@ -8,6 +8,7 @@ import {
   type FieldSpec,
 } from '../io/mapping'
 import { readTable } from '../io/readTable'
+import { WarningIcon } from './Icons'
 
 interface ImportWizardProps<T> {
   label: string
@@ -181,7 +182,8 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
           {fullWarnings.length > 0 && (
             <details className="import__warnings">
               <summary className="import__warncount">
-                ⚠️ {fullWarnings.length} warning(s) — click to review before importing
+                <WarningIcon /> {fullWarnings.length} warning(s) — click to review before
+                importing
               </summary>
               <ul aria-label={`${label} import warnings`}>
                 {fullWarnings.slice(0, 10).map((w, i) => (
