@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { AppStoreProvider } from './state/AppStore'
+import { HowItWorksModal } from './screens/HowItWorks'
 import { Stepper } from './screens/Stepper'
 import { UploadScreen } from './screens/UploadScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
@@ -26,6 +28,7 @@ export function App() {
 }
 
 function AppShell() {
+  const [showHelp, setShowHelp] = useState(false)
   return (
     <div className="app">
       <header className="app__header">
@@ -43,11 +46,16 @@ function AppShell() {
             </NavLink>
           ))}
         </nav>
-        <span className="app__privacy" title="All processing happens in your browser.">
-          🔒 Runs in your browser
-        </span>
+        <button
+          className="app__help"
+          onClick={() => setShowHelp(true)}
+          title="How this app works — privacy, matching, and files"
+        >
+          🔒 How it works
+        </button>
       </header>
       <Stepper />
+      {showHelp && <HowItWorksModal onClose={() => setShowHelp(false)} />}
       <main className="app__main">
         <Routes>
           <Route path="/" element={<Navigate to="/upload" replace />} />
