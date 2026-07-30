@@ -155,7 +155,7 @@ export function MatchScreen() {
       {pendingReRun != null && (
         <div className="modal-backdrop" onClick={() => setPendingReRun(null)}>
           <div
-            className="modal"
+            className="modal modal--confirm"
             role="dialog"
             aria-modal="true"
             aria-label="Confirm re-run"

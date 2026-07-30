@@ -1094,6 +1094,20 @@ details.warnings summary {
   padding: 0.8rem 1rem;
   border-top: 1px solid var(--border);
 }
+
+/* Simple confirmation dialog: no internal divider lines. */
+.modal--confirm .modal__head {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.modal--confirm .modal__hint {
+  padding: 0.5rem 1rem 0;
+  color: var(--text);
+}
+.modal--confirm .modal__foot {
+  border-top: none;
+  padding-top: 0.75rem;
+}
 .board-meta {
   display: flex;
   align-items: center;
