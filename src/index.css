@@ -585,19 +585,38 @@ body {
 }
 
 /* Import wizard */
-.import {
-  border-radius: var(--r-md);
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-}
-.import--dragover {
-  background: var(--accent-weak);
-  box-shadow: 0 0 0 2px var(--accent);
-}
 .import__head {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
+}
+/* Generous click-or-drop zone: button with the drop hint pinned beneath it. */
+.import__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+  padding: 1.5rem 1rem;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.import__drop:hover {
+  border-color: var(--accent);
+}
+.import__drop--over {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+/* The zone owns the dashed affordance; the inner button reads as solid. */
+.import__drop .btn--file {
+  border-style: solid;
+  pointer-events: none;
 }
 .import__drophint {
   font-size: 0.8rem;
@@ -739,21 +758,32 @@ details.warnings summary {
   gap: 0.6rem;
   grid-template-columns: 1fr 1fr;
 }
+/* Radio card: control and title share the first row; description sits under
+   the title, aligned with it. */
 .settings-radio {
-  display: block;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.55rem;
+  row-gap: 0.15rem;
+  align-items: center;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  padding: 0.6rem 0.7rem;
+  padding: 0.65rem 0.75rem;
   cursor: pointer;
+}
+.settings-radio input {
+  margin: 0;
+  accent-color: var(--accent);
 }
 .settings-radio--on {
   border-color: var(--accent);
   background: var(--accent-weak);
 }
 .settings-radio__title {
-  display: block;
   font-weight: 600;
-  margin: 0.2rem 0;
+}
+.settings-radio__advantage {
+  grid-column: 2;
 }
 .settings-radio__default {
   font-weight: 400;
@@ -773,7 +803,6 @@ details.warnings summary {
   padding: 0.5rem 0 0;
   font-size: 0.85rem;
 }
-.settings-why,
 .settings-effect {
   font-size: 0.85rem;
   color: var(--muted);

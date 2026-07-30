@@ -279,15 +279,37 @@ function ProposingSide({
         ))}
       </div>
 
-      <button className="linklike" onClick={() => setShowWhy((v) => !v)} aria-expanded={showWhy}>
+      <button className="linklike" onClick={() => setShowWhy(true)}>
         Why does this matter?
       </button>
       {showWhy && (
-        <p className="settings-why">
-          Deferred acceptance advantages the proposing side: proposers get their best possible
-          stable match, while the receiving side gets their worst. So this choice decides whether
-          papers or reviewers get their top picks.
-        </p>
+        <div className="modal-backdrop" onClick={() => setShowWhy(false)}>
+          <div
+            className="modal modal--confirm"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Why the proposing side matters"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal__head">
+              <strong>Why does this matter?</strong>
+              <button className="modal__close" onClick={() => setShowWhy(false)} aria-label="Close">
+                ×
+              </button>
+            </div>
+            <p className="modal__hint">
+              The matching algorithm (deferred acceptance) advantages the proposing side: proposers
+              get their best possible stable match, while the receiving side gets their worst. So
+              this choice decides whether papers or reviewers get their top picks. Either way, the
+              result is stable; it only changes who the ties break toward.
+            </p>
+            <div className="modal__foot">
+              <button className="btn" onClick={() => setShowWhy(false)}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <p className="settings-effect">

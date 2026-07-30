@@ -70,7 +70,7 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
   const inputId = `import-${label.toLowerCase()}`
   return (
     <div
-      className={`import${dragOver ? ' import--dragover' : ''}`}
+      className="import"
       onDragOver={(e) => {
         e.preventDefault()
         setDragOver(true)
@@ -85,12 +85,6 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
     >
       <div className="import__head">
         <strong>{label}</strong>
-        <label htmlFor={inputId} className="btn btn--file">
-          {fileName ? `Change file (${fileName})` : `Choose ${label} file`}
-        </label>
-        <span className="import__drophint" aria-hidden="true">
-          or drop it here
-        </span>
         <input
           id={inputId}
           type="file"
@@ -103,6 +97,18 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
           }}
         />
       </div>
+      {/* The whole zone is a drop target and clicking it opens the file picker. */}
+      <label
+        htmlFor={inputId}
+        className={`import__drop${dragOver ? ' import__drop--over' : ''}`}
+      >
+        <span className="btn btn--file" aria-hidden="true">
+          {fileName ? `Change file (${fileName})` : `Choose ${label} file`}
+        </span>
+        <span className="import__drophint" aria-hidden="true">
+          or drop it here
+        </span>
+      </label>
 
       {rawRows.length > 0 && (
         <>
