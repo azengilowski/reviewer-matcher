@@ -171,21 +171,14 @@ export function BoardView({ run }: { run: MatchRun }) {
     // Otherwise nothing to do (e.g. dropped back in the tray it came from).
     if (sourcePaperId === targetPaperId) return
 
-    let result = computeMove(assignments, run, name, sourcePaperId, reviewerId, targetPaperId)
+    const result = computeMove(assignments, run, name, sourcePaperId, reviewerId, targetPaperId)
     if (result === 'conflict') {
-      const reason = window.prompt(
-        `${name} is a self-authorship conflict on paper ${targetPaperId}. Type a reason to override, or Cancel.`,
+      showToast(
+        `${name} can't be added to paper ${targetPaperId} — they're an author of it (self-authorship conflict).`,
       )
-      if (!reason) {
-        showToast(`${name} not added — self-authorship conflict on paper ${targetPaperId}.`)
-        return
-      }
-      result = computeMove(assignments, run, name, sourcePaperId, reviewerId, targetPaperId, {
-        overrideConflict: true,
-        reason,
-      })
+      return
     }
-    if (result && result !== 'conflict') commitAssignments(result.next, result.action, result.detail)
+    if (result) commitAssignments(result.next, result.action, result.detail)
   }
 
   return (
