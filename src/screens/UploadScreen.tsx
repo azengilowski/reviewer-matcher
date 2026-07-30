@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import {
   buildPapers,
   buildReviewers,
@@ -105,23 +104,15 @@ export function UploadScreen() {
         </div>
       </div>
 
-      <div className="upload-next">
-        <button className="btn btn--ghost" onClick={loadSample} disabled={loadingSample}>
-          {loadingSample ? 'Loading…' : 'Load sample data'}
-        </button>
-        {reviewers.length > 0 && papers.length > 0 && (
-          <Link className="btn" to="/settings" title="Next step: configure the match settings">
-            Continue to Settings →
-          </Link>
-        )}
-      </div>
+      <button className="btn btn--ghost" onClick={loadSample} disabled={loadingSample}>
+        {loadingSample ? 'Loading…' : 'Load sample data'}
+      </button>
 
       <hr className="rule" />
-      <h3 className="upload-section">Save or restore a project</h3>
+      <h3 className="upload-section">Restore a saved project</h3>
       <p className="muted upload-section__hint">
-        Export a <code>.matchproj</code> file to back up or move everything (data, settings, match,
-        edits) — re-import it to pick up exactly where you left off. You can also re-import a
-        hand-edited results CSV.
+        Import a <code>.matchproj</code> file to pick up exactly where you left off (export one from
+        the Export step), or re-import a hand-edited results CSV. Everything stays in your browser.
       </p>
       <ProjectBar />
 

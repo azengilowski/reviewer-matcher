@@ -49,9 +49,9 @@ describe('upload → run → results thread', () => {
 
     await user.click(screen.getByRole('button', { name: /run match/i }))
 
-    // Results table appears with a stable match.
+    // Results appear with a stable match and an assignments tally.
     await waitFor(() => expect(screen.getByText(/stable/i)).toBeInTheDocument())
-    expect(screen.getByRole('button', { name: /export results csv/i })).toBeInTheDocument()
+    expect(screen.getByText(/\d+ assignments/i)).toBeInTheDocument()
 
     // The math paper's board column should list the math reviewer.
     const mathColumn = screen.getByRole('link', { name: 'p1' }).closest('.col')!

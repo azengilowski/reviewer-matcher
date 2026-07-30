@@ -28,8 +28,8 @@ body {
 .app__header {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0.75rem 1.25rem;
+  gap: 1rem;
+  padding: 0.6rem 1.25rem;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
@@ -38,26 +38,7 @@ body {
   font-weight: 700;
   font-size: 1.05rem;
   margin: 0;
-}
-
-.app__nav {
-  display: flex;
-  gap: 0.25rem;
-  flex: 1;
-}
-
-.app__navlink {
-  padding: 0.4rem 0.75rem;
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.app__navlink--active {
-  color: var(--accent);
-  background: var(--accent-weak);
-  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .app__help {
@@ -90,14 +71,13 @@ body {
   margin: 0 auto;
 }
 
-/* Progress stepper */
+/* Progress stepper — lives inside the header, taking the middle space */
 .stepper {
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  padding: 0.5rem 1.25rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
 }
 .step {
@@ -144,13 +124,42 @@ body {
   color: var(--border);
   font-size: 1rem;
 }
-.upload-next {
+
+/* "Next: X →" footer on each step */
+.step-footer {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
 }
 
+/* Export step cards */
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.export-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.export-card__desc {
+  margin: 0;
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.export-card .btn {
+  align-self: flex-start;
+}
 .screen__title {
   margin: 0 0 0.35rem;
   font-size: 1.5rem;

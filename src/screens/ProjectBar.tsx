@@ -1,29 +1,12 @@
 import { useState } from 'react'
-import { downloadText } from '../io/download'
-import { parseProject, serializeProject } from '../io/project'
+import { parseProject } from '../io/project'
 import { importResultsCsv, type ResolutionReport } from '../io/resultsImport'
 import { useApp } from '../state/AppStore'
 
 export function ProjectBar() {
-  const {
-    reviewers,
-    papers,
-    settings,
-    run,
-    assignments,
-    lockedPapers,
-    auditLog,
-    runHistory,
-    loadProject,
-    commitAssignments,
-  } = useApp()
+  const { reviewers, papers, run, loadProject, commitAssignments } = useApp()
   const [message, setMessage] = useState<string | null>(null)
   const [report, setReport] = useState<ResolutionReport | null>(null)
-
-  function exportProject() {
-    const json = serializeProject({ reviewers, papers, settings, run, assignments, lockedPapers, auditLog, runHistory })
-    downloadText('reviewer-match.matchproj', json, 'application/json')
-  }
 
   async function onProjectFile(file: File) {
     const result = parseProject(await file.text())
@@ -49,12 +32,8 @@ export function ProjectBar() {
 
   return (
     <div className="projectbar">
-      <button className="btn btn--ghost" onClick={exportProject} disabled={reviewers.length === 0 && papers.length === 0}>
-        Export project (.matchproj)
-      </button>
-
       <label htmlFor="proj-import" className="btn btn--file">
-        Import project
+        Import project (.matchproj)
       </label>
       <input
         id="proj-import"

@@ -14,7 +14,7 @@ describe('App shell', () => {
   it('renders the app title and all nav links', () => {
     renderAt('/')
     expect(screen.getByText('Reviewer Matcher')).toBeInTheDocument()
-    for (const label of ['Upload', 'Settings', 'Match', 'Details', 'Dashboard']) {
+    for (const label of ['Upload', 'Settings', 'Match', 'Review', 'Export']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
   })

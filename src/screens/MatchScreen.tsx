@@ -1,7 +1,4 @@
 import { useMemo, useState } from 'react'
-import { downloadText } from '../io/download'
-import { exportResultsCsv } from '../io/exportResults'
-import { exportReportCsv } from '../io/reportExport'
 import { useApp } from '../state/AppStore'
 import { BoardView } from './BoardView'
 import { ScreenShell } from './ScreenShell'
@@ -41,14 +38,6 @@ export function MatchScreen() {
     }
   }, [assignments, papers, reviewers])
 
-  function onExport() {
-    downloadText('reviewer-assignments.csv', exportResultsCsv(assignments, papers, reviewers))
-  }
-  function onExportReport() {
-    if (!run) return
-    downloadText('reviewer-match-report.csv', exportReportCsv(run, assignments, reviewers, papers, settings))
-  }
-
   return (
     <ScreenShell
       title="Match"
@@ -71,24 +60,6 @@ export function MatchScreen() {
         >
           {status === 'running' ? 'Running…' : run ? 'Re-run match' : 'Run match'}
         </button>
-        {run && (
-          <button
-            className="btn btn--ghost"
-            onClick={onExport}
-            title="Download assignments as CSV (one column per paper, reviewer names in rows)"
-          >
-            Export results CSV
-          </button>
-        )}
-        {run && (
-          <button
-            className="btn btn--ghost"
-            onClick={onExportReport}
-            title="Download a per-paper report: every ranked reviewer, similarity score, and outcome"
-          >
-            Export report CSV
-          </button>
-        )}
       </div>
 
       {status === 'running' && progress && (
