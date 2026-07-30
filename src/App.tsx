@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { AppStoreProvider, useApp } from './state/AppStore'
+import { HomeScreen } from './screens/HomeScreen'
 import { HowItWorksModal } from './screens/HowItWorks'
+import { Logo } from './screens/Logo'
 import { Stepper } from './screens/Stepper'
 import { StepFooter } from './screens/StepFooter'
 import { UploadScreen } from './screens/UploadScreen'
@@ -36,24 +38,10 @@ function AppShell() {
     <div className="app">
       <header className="app__header">
         <h1 className="app__title">
-          <svg
-            className="app__logo"
-            viewBox="0 0 512 512"
-            width="22"
-            height="22"
-            aria-hidden="true"
-          >
-            <rect width="512" height="512" rx="112" fill="var(--accent)" />
-            <g fill="none" stroke="#fff" strokeWidth="34" strokeLinecap="round">
-              <circle cx="168" cy="150" r="46" />
-              <circle cx="168" cy="362" r="46" />
-              <circle cx="344" cy="256" r="46" />
-              <path d="M168 196 v120" />
-              <path d="M206 172 L306 236" />
-              <path d="M206 340 L306 276" />
-            </g>
-          </svg>
-          Reviewer Matcher
+          <Link to="/" className="app__homelink" title="Home">
+            <Logo />
+            Reviewer Matcher
+          </Link>
         </h1>
         <Stepper />
         {(reviewers.length > 0 || papers.length > 0) && (
@@ -150,7 +138,7 @@ function AppShell() {
           state (e.g. a half-configured import wizard). */}
       <main className="app__main" ref={mainRef} key={resetEpoch}>
         <Routes>
-          <Route path="/" element={<Navigate to="/upload" replace />} />
+          <Route path="/" element={<HomeScreen />} />
           <Route path="/upload" element={<UploadScreen />} />
           <Route path="/settings" element={<SettingsScreen />} />
           <Route path="/match" element={<MatchScreen />} />

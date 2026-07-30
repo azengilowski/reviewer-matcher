@@ -13,15 +13,19 @@ function renderAt(path: string) {
 describe('App shell', () => {
   it('renders the app title and all nav links', () => {
     renderAt('/')
-    expect(screen.getByText('Reviewer Matcher')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Reviewer Matcher')
     for (const label of ['Upload', 'Settings', 'Match', 'Review', 'Export']) {
       expect(screen.getByRole('link', { name: label })).toBeInTheDocument()
     }
   })
 
-  it('redirects the index route to the Upload screen', () => {
+  it('shows the home screen at the index route, with a way in', () => {
     renderAt('/')
-    expect(screen.getByRole('heading', { level: 2, name: 'Upload' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Reviewer Matcher' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /get started/i })).toHaveAttribute('href', '/upload')
+    // Both the header and the hero offer "How it works".
+    expect(screen.getAllByRole('button', { name: /how it works|how this app works/i }).length)
+      .toBeGreaterThanOrEqual(2)
   })
 
   it('renders the Dashboard screen at its route, with the Review sub-nav', () => {
