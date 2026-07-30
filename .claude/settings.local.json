@@ -51,7 +51,8 @@
       "Bash(gh run *)",
       "Bash(git push *)",
       "Bash(npx tsc *)",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(awk -F: '{print $NF}')"
     ]
   }
 }

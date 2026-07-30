@@ -43,24 +43,46 @@ export function MatchScreen() {
       title="Match"
       intro="Run the match, then drag reviewers to fine-tune. Assignments update live."
     >
-      <p className="match-summary">
-        {reviewers.length} reviewers · {papers.length} papers
-      </p>
+      {run || status === 'running' ? (
+        <>
+          <p className="match-summary">
+            {reviewers.length} reviewers · {papers.length} papers
+          </p>
 
-      <div className="match-actions">
-        <button
-          className="btn"
-          onClick={onRun}
-          disabled={!canRun}
-          title={
-            run
-              ? 'Re-run the match with current settings (locked papers are preserved)'
-              : 'Run the match using the current settings'
-          }
-        >
-          {status === 'running' ? 'Running…' : run ? 'Re-run match' : 'Run match'}
-        </button>
-      </div>
+          <div className="match-actions">
+            <button
+              className="btn"
+              onClick={onRun}
+              disabled={!canRun}
+              title={
+                run
+                  ? 'Re-run the match with current settings (locked papers are preserved)'
+                  : 'Run the match using the current settings'
+              }
+            >
+              {status === 'running' ? 'Running…' : run ? 'Re-run match' : 'Run match'}
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="match-hero">
+          <MatchHeroArt />
+          <h3 className="match-hero__title">Ready to find your matches</h3>
+          <p className="match-hero__sub">
+            {reviewers.length > 0 && papers.length > 0
+              ? `${reviewers.length} reviewers and ${papers.length} papers are loaded. The matcher pairs every paper with its best-fit reviewers; you can fine-tune the board afterwards.`
+              : 'Import reviewers and papers on the Upload step, then come back to run the match.'}
+          </p>
+          <button
+            className="btn"
+            onClick={onRun}
+            disabled={!canRun}
+            title="Run the match using the current settings"
+          >
+            Run match
+          </button>
+        </div>
+      )}
 
       {/* Status area: while running, the progress bar takes over the badges'
           spot (same slot, fixed height) so the board below never jumps. */}
@@ -160,5 +182,45 @@ export function MatchScreen() {
         </div>
       )}
     </ScreenShell>
+  )
+}
+
+/** Papers-to-reviewers illustration for the pre-run empty state. */
+function MatchHeroArt() {
+  return (
+    <svg className="match-hero__art" viewBox="0 0 220 120" aria-hidden="true">
+      {/* connections */}
+      <g stroke="var(--accent)" strokeWidth="2" opacity="0.4">
+        <path d="M74 32 C 110 32 110 24 146 24" fill="none" />
+        <path d="M74 60 C 110 60 110 60 146 60" fill="none" />
+        <path d="M74 88 C 110 88 110 96 146 96" fill="none" />
+        <path d="M74 32 C 112 32 108 60 146 60" fill="none" />
+      </g>
+      {/* papers */}
+      <g fill="var(--surface)" stroke="var(--border)" strokeWidth="2">
+        <rect x="30" y="20" width="44" height="24" rx="6" />
+        <rect x="30" y="48" width="44" height="24" rx="6" />
+        <rect x="30" y="76" width="44" height="24" rx="6" />
+      </g>
+      <g fill="var(--border)">
+        <rect x="38" y="29" width="28" height="3" rx="1.5" />
+        <rect x="38" y="57" width="28" height="3" rx="1.5" />
+        <rect x="38" y="85" width="28" height="3" rx="1.5" />
+      </g>
+      {/* reviewers */}
+      <g fill="var(--accent-weak)" stroke="var(--accent)" strokeWidth="2">
+        <circle cx="158" cy="24" r="12" />
+        <circle cx="158" cy="60" r="12" />
+        <circle cx="158" cy="96" r="12" />
+      </g>
+      <g fill="var(--accent)">
+        <circle cx="158" cy="21" r="4" />
+        <path d="M150 30 a8 5 0 0 1 16 0 z" />
+        <circle cx="158" cy="57" r="4" />
+        <path d="M150 66 a8 5 0 0 1 16 0 z" />
+        <circle cx="158" cy="93" r="4" />
+        <path d="M150 102 a8 5 0 0 1 16 0 z" />
+      </g>
+    </svg>
   )
 }

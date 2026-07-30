@@ -55,7 +55,11 @@ export function UploadScreen() {
               setWarnings(w)
             }}
           />
-          <p className="upload-card__count" data-testid="count-reviewers">
+          <p
+            className={`upload-card__count${reviewers.length > 0 ? ' upload-card__count--ok' : ''}`}
+            data-testid="count-reviewers"
+          >
+            {reviewers.length > 0 ? '✓ ' : ''}
             {reviewers.length} loaded
           </p>
           {reviewers.length > 0 && (
@@ -85,7 +89,11 @@ export function UploadScreen() {
               setWarnings(w)
             }}
           />
-          <p className="upload-card__count" data-testid="count-papers">
+          <p
+            className={`upload-card__count${papers.length > 0 ? ' upload-card__count--ok' : ''}`}
+            data-testid="count-papers"
+          >
+            {papers.length > 0 ? '✓ ' : ''}
             {papers.length} loaded
           </p>
           {papers.length > 0 && (

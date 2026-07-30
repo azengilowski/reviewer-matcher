@@ -62,7 +62,7 @@ export function SettingsScreen() {
             </label>
           ))}
           <label className="settings-role">
-            <span>other roles (default)</span>
+            <span title="Used for any role that isn't listed above">any unlisted role</span>
             <input
               type="number"
               min={0}

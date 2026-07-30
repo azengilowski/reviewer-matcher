@@ -32,7 +32,26 @@ function AppShell() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1 className="app__title">Reviewer Matcher</h1>
+        <h1 className="app__title">
+          <svg
+            className="app__logo"
+            viewBox="0 0 512 512"
+            width="22"
+            height="22"
+            aria-hidden="true"
+          >
+            <rect width="512" height="512" rx="112" fill="var(--accent)" />
+            <g fill="none" stroke="#fff" strokeWidth="34" strokeLinecap="round">
+              <circle cx="168" cy="150" r="46" />
+              <circle cx="168" cy="362" r="46" />
+              <circle cx="344" cy="256" r="46" />
+              <path d="M168 196 v120" />
+              <path d="M206 172 L306 236" />
+              <path d="M206 340 L306 276" />
+            </g>
+          </svg>
+          Reviewer Matcher
+        </h1>
         <Stepper />
         <button
           className="app__help"

@@ -31,6 +31,7 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
   const [rawRows, setRawRows] = useState<string[][]>([])
   const [firstRowHeader, setFirstRowHeader] = useState(true)
   const [mapping, setMapping] = useState<ColumnMapping>({})
+  const [dragOver, setDragOver] = useState(false)
 
   const headers = useMemo(() => tableHeaders(rawRows, firstRowHeader), [rawRows, firstRowHeader])
   const body = useMemo(() => dataRows(rawRows, firstRowHeader), [rawRows, firstRowHeader])
@@ -68,12 +69,28 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
 
   const inputId = `import-${label.toLowerCase()}`
   return (
-    <div className="import">
+    <div
+      className={`import${dragOver ? ' import--dragover' : ''}`}
+      onDragOver={(e) => {
+        e.preventDefault()
+        setDragOver(true)
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault()
+        setDragOver(false)
+        const file = e.dataTransfer.files?.[0]
+        if (file) onFile(file)
+      }}
+    >
       <div className="import__head">
         <strong>{label}</strong>
         <label htmlFor={inputId} className="btn btn--file">
           {fileName ? `Change file (${fileName})` : `Choose ${label} file`}
         </label>
+        <span className="import__drophint" aria-hidden="true">
+          or drop it here
+        </span>
         <input
           id={inputId}
           type="file"
