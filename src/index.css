@@ -61,19 +61,25 @@ body {
 }
 
 .app__help {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.8rem;
-  color: var(--muted);
+  font-weight: 600;
   white-space: nowrap;
-  background: transparent;
-  border: 1px solid var(--border);
+  color: #fff;
+  background: #1a7f37;
+  border: 1px solid #1a7f37;
   border-radius: 999px;
-  padding: 0.25rem 0.7rem;
+  padding: 0.3rem 0.75rem;
   cursor: pointer;
 }
 .app__help:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-weak);
+  background: #166a2e;
+  border-color: #166a2e;
+}
+.app__help svg {
+  display: block;
 }
 
 .app__main {
