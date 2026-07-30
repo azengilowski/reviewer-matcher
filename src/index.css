@@ -724,6 +724,10 @@ body {
   gap: 0.75rem;
   margin-top: 0.75rem;
 }
+.import__skipnote {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
 /* Pre-import warnings: count expands in place to the actual messages. */
 .import__warnings {
   margin-top: 0.5rem;

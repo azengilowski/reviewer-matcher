@@ -36,7 +36,9 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
   const headers = useMemo(() => tableHeaders(rawRows, firstRowHeader), [rawRows, firstRowHeader])
   const body = useMemo(() => dataRows(rawRows, firstRowHeader), [rawRows, firstRowHeader])
   const preview = useMemo(() => build(body.slice(0, 5), mapping), [build, body, mapping])
-  const fullWarnings = useMemo(() => build(body, mapping).warnings, [build, body, mapping])
+  // Full dry-run build: importable row count for the button, warnings for review.
+  const fullBuild = useMemo(() => build(body, mapping), [build, body, mapping])
+  const fullWarnings = fullBuild.warnings
 
   async function onFile(file: File) {
     const table = await readTable(file)
@@ -166,9 +168,14 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
           </table>
 
           <div className="import__actions">
-            <button className="btn" onClick={doImport}>
-              Import {body.length} {label.toLowerCase()}
+            <button className="btn" onClick={doImport} disabled={fullBuild.rows.length === 0}>
+              Import {fullBuild.rows.length} {label.toLowerCase()}
             </button>
+            {fullBuild.rows.length < body.length && (
+              <span className="import__skipnote">
+                {body.length - fullBuild.rows.length} of {body.length} rows will be skipped
+              </span>
+            )}
           </div>
 
           {fullWarnings.length > 0 && (
