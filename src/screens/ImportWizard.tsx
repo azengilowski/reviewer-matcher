@@ -169,10 +169,23 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
             <button className="btn" onClick={doImport}>
               Import {body.length} {label.toLowerCase()}
             </button>
-            {fullWarnings.length > 0 && (
-              <span className="import__warncount">⚠️ {fullWarnings.length} warning(s)</span>
-            )}
           </div>
+
+          {fullWarnings.length > 0 && (
+            <details className="import__warnings">
+              <summary className="import__warncount">
+                ⚠️ {fullWarnings.length} warning(s) — click to review before importing
+              </summary>
+              <ul aria-label={`${label} import warnings`}>
+                {fullWarnings.slice(0, 10).map((w, i) => (
+                  <li key={i}>{w}</li>
+                ))}
+                {fullWarnings.length > 10 && (
+                  <li className="muted">…and {fullWarnings.length - 10} more</li>
+                )}
+              </ul>
+            </details>
+          )}
         </>
       )}
     </div>
