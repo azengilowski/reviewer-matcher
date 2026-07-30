@@ -410,7 +410,8 @@ body {
 }
 .home__points strong {
   color: var(--text);
-  font-weight: 600;
+  /* Medium, not full bold: emphasis without the chunky weight. */
+  font-weight: 500;
 }
 .home__points svg {
   flex-shrink: 0;
