@@ -6,6 +6,7 @@ import {
   PAPER_FIELDS,
   REVIEWER_FIELDS,
   tableHeaders,
+  templateCsv,
 } from './mapping'
 import { parseDelimited } from './readTable'
 
@@ -58,6 +59,24 @@ describe('build with validation', () => {
     expect(rows).toHaveLength(1)
     expect(rows[0].id).toBe('R2')
     expect(warnings.some((w) => /no id/i.test(w))).toBe(true)
+  })
+})
+
+describe('template CSV round-trip', () => {
+  it.each([
+    ['reviewers', REVIEWER_FIELDS, buildReviewers],
+    ['papers', PAPER_FIELDS, buildPapers],
+  ] as const)('%s template auto-maps every column and builds warning-free', (_label, fields, build) => {
+    const rows = parseDelimited(templateCsv(fields))
+    expect(looksLikeHeader(rows, fields)).toBe(true)
+    const mapping = guessMapping(fields, tableHeaders(rows, true), true)
+    // Every field should auto-map to some column.
+    for (const f of fields) {
+      expect(mapping[f.key]).toBeGreaterThanOrEqual(0)
+    }
+    const built = build(rows.slice(1), mapping)
+    expect(built.rows).toHaveLength(1)
+    expect(built.warnings).toHaveLength(0)
   })
 })
 

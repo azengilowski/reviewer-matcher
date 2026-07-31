@@ -158,6 +158,17 @@ export function guessMapping(
   return mapping
 }
 
+/**
+ * A starter CSV: one header row (using alias names, so re-uploading the filled
+ * template auto-maps every column) plus one example row.
+ */
+export function templateCsv(fields: FieldSpec[]): string {
+  const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
+  const headers = fields.map((f) => f.aliases[0])
+  const example = fields.map((f) => f.example)
+  return [headers.map(esc).join(','), example.map(esc).join(',')].join('\n')
+}
+
 function cell(row: string[], idx: number): string {
   return idx >= 0 ? (row[idx] ?? '').trim() : ''
 }

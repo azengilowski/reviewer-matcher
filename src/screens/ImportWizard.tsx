@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
+import { downloadText } from '../io/download'
 import {
   dataRows,
   guessMapping,
   looksLikeHeader,
   tableHeaders,
+  templateCsv,
   type ColumnMapping,
   type FieldSpec,
 } from '../io/mapping'
@@ -146,6 +148,14 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
             </li>
           ))}
         </ul>
+        <button
+          className="linklike"
+          onClick={() =>
+            downloadText(`${label.toLowerCase()}-template.csv`, templateCsv(fields), 'text/csv')
+          }
+        >
+          Download a template CSV (headers + one example row)
+        </button>
       </details>
 
       {rawRows.length > 0 && !reviewOpen && (
