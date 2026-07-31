@@ -7,32 +7,102 @@ export interface FieldSpec {
   required?: boolean
   /** Header names that should auto-map to this field (lowercased). */
   aliases: string[]
+  /** What the column should contain (shown in the import guide + review modal). */
+  hint: string
+  /** A realistic example value. */
+  example: string
 }
 
 export const REVIEWER_FIELDS: FieldSpec[] = [
-  { key: 'id', label: 'ID', required: true, aliases: ['id', 'reviewer id', 'reviewerid'] },
-  { key: 'name', label: 'Name', aliases: ['name', 'reviewer', 'full name'] },
-  { key: 'role', label: 'Role', aliases: ['role', 'type'] },
+  {
+    key: 'id',
+    label: 'ID',
+    required: true,
+    aliases: ['id', 'reviewer id', 'reviewerid'],
+    hint: 'Any unique value per reviewer: a number or short code. Only used to tell rows apart.',
+    example: 'R17',
+  },
+  {
+    key: 'name',
+    label: 'Name',
+    aliases: ['name', 'reviewer', 'full name'],
+    hint: 'Full name, "First Last" or "Last, First". Must be spelled the same way as in the papers\' Authors column so own-paper conflicts are caught (initials or abbreviations won\'t match).',
+    example: 'Vega, Rowan',
+  },
+  {
+    key: 'role',
+    label: 'Role',
+    aliases: ['role', 'type'],
+    hint: 'student or professor (any capitalization). Anything else counts as "other" and uses the default load from Configure.',
+    example: 'professor',
+  },
   {
     key: 'criteria',
     label: 'Specialties / criteria',
     aliases: ['criteria', 'specialties', 'specialty', 'keywords', 'expertise'],
+    hint: 'Free text describing expertise: topics, methods, keywords. This is the main matching signal, so richer is better.',
+    example: 'reading comprehension; multilingual learners; mixed methods',
   },
   {
     key: 'criteria2',
     label: 'More criteria (e.g. publications)',
     aliases: ['publications', 'papers', 'bio', 'research'],
+    hint: 'Optional extra matching signal, e.g. recent publication titles or a short bio. Combined with Specialties.',
+    example: 'Scaffolding reading in dual-language classrooms (2024)',
   },
-  { key: 'institution', label: 'Institution', aliases: ['institution', 'affiliation'] },
+  {
+    key: 'institution',
+    label: 'Institution',
+    aliases: ['institution', 'affiliation'],
+    hint: 'Optional, free text, shown for reference only. It is not used for matching or conflicts, so names, abbreviations, or sub-programs are all fine.',
+    example: 'Univ. of Michigan, School of Ed.',
+  },
 ]
 
 export const PAPER_FIELDS: FieldSpec[] = [
-  { key: 'id', label: 'ID', required: true, aliases: ['id', 'paper id', 'paperid'] },
-  { key: 'title', label: 'Title', aliases: ['title', 'paper title'] },
-  { key: 'abstract', label: 'Abstract', aliases: ['abstract', 'summary'] },
-  { key: 'keywords', label: 'Keywords', aliases: ['keywords', 'descriptors', 'topics'] },
-  { key: 'method', label: 'Method', aliases: ['method', 'methodology'] },
-  { key: 'authors', label: 'Authors', aliases: ['authors', 'author'] },
+  {
+    key: 'id',
+    label: 'ID',
+    required: true,
+    aliases: ['id', 'paper id', 'paperid'],
+    hint: 'Any unique value per paper: a number or short code. Shown on the board and in exports.',
+    example: 'P42',
+  },
+  {
+    key: 'title',
+    label: 'Title',
+    aliases: ['title', 'paper title'],
+    hint: 'The paper title, free text. Part of the matching signal.',
+    example: 'Design-Based Research on Engagement in Online Courses',
+  },
+  {
+    key: 'abstract',
+    label: 'Abstract',
+    aliases: ['abstract', 'summary'],
+    hint: 'The abstract or a summary, free text. The strongest matching signal; include it if you have it.',
+    example: 'This study examines how…',
+  },
+  {
+    key: 'keywords',
+    label: 'Keywords',
+    aliases: ['keywords', 'descriptors', 'topics'],
+    hint: 'Topic keywords in any format (comma, semicolon, or space separated). Part of the matching signal.',
+    example: 'online learning; engagement; design-based research',
+  },
+  {
+    key: 'method',
+    label: 'Method',
+    aliases: ['method', 'methodology'],
+    hint: 'Methodology, e.g. Qualitative, Quantitative, Mixed Methods. Used by the method-match boost in Configure.',
+    example: 'Qualitative',
+  },
+  {
+    key: 'authors',
+    label: 'Authors',
+    aliases: ['authors', 'author'],
+    hint: 'Author names in one cell, any separator. Spell names as they appear in the reviewer list ("First Last" and "Last, First" both work) so authors are never assigned their own paper.',
+    example: 'Rowan Vega; Sunil Ibarra',
+  },
 ]
 
 /** fieldKey -> column index (-1 = not mapped). */

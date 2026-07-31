@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   dataRows,
   guessMapping,
@@ -27,19 +27,21 @@ function loadRemembered(storageKey: string): ColumnMapping | null {
   }
 }
 
+/** Cap the editable preview so huge sheets stay snappy. */
+const PREVIEW_ROWS = 50
+
 export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: ImportWizardProps<T>) {
   const [fileName, setFileName] = useState<string | null>(null)
   const [rawRows, setRawRows] = useState<string[][]>([])
   const [firstRowHeader, setFirstRowHeader] = useState(true)
   const [mapping, setMapping] = useState<ColumnMapping>({})
   const [dragOver, setDragOver] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
 
   const headers = useMemo(() => tableHeaders(rawRows, firstRowHeader), [rawRows, firstRowHeader])
   const body = useMemo(() => dataRows(rawRows, firstRowHeader), [rawRows, firstRowHeader])
-  const preview = useMemo(() => build(body.slice(0, 5), mapping), [build, body, mapping])
   // Full dry-run build: importable row count for the button, warnings for review.
   const fullBuild = useMemo(() => build(body, mapping), [build, body, mapping])
-  const fullWarnings = fullBuild.warnings
 
   async function onFile(file: File) {
     const table = await readTable(file)
@@ -49,6 +51,7 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
     setRawRows(table.rows)
     setFirstRowHeader(hasHeader)
     setMapping(loadRemembered(storageKey) ?? guessMapping(fields, hdrs, hasHeader))
+    setReviewOpen(true)
   }
 
   function toggleHeader(next: boolean) {
@@ -60,6 +63,20 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
     setMapping((m) => ({ ...m, [key]: col }))
   }
 
+  /** Write an edited cell back into the raw table (bodyIndex is header-adjusted). */
+  function editCell(bodyIndex: number, col: number, value: string) {
+    const abs = firstRowHeader ? bodyIndex + 1 : bodyIndex
+    setRawRows((rows) =>
+      rows.map((row, i) => {
+        if (i !== abs) return row
+        const next = row.slice()
+        while (next.length <= col) next.push('')
+        next[col] = value
+        return next
+      }),
+    )
+  }
+
   function doImport() {
     const built = build(body, mapping)
     try {
@@ -68,6 +85,7 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
       /* storage may be unavailable; mapping just won't be remembered */
     }
     onImport(built.rows, built.warnings)
+    setReviewOpen(false)
   }
 
   const inputId = `import-${label.toLowerCase()}`
@@ -113,90 +131,231 @@ export function ImportWizard<T>({ label, fields, storageKey, build, onImport }: 
         </span>
       </label>
 
-      {rawRows.length > 0 && (
-        <>
+      {/* What each column should contain, readable before a file is chosen. */}
+      <details className="import__guide">
+        <summary>What columns do I need?</summary>
+        <ul>
+          {fields.map((f) => (
+            <li key={f.key}>
+              <strong>
+                {f.label}
+                {f.required ? ' (required)' : ''}
+              </strong>{' '}
+              — {f.hint}{' '}
+              <span className="import__guide-example">e.g. “{f.example}”</span>
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      {rawRows.length > 0 && !reviewOpen && (
+        <div className="import__status">
+          <span className="muted">
+            {fileName} · {body.length} rows
+          </span>
+          <button className="btn btn--ghost btn--sm" onClick={() => setReviewOpen(true)}>
+            Review &amp; import…
+          </button>
+        </div>
+      )}
+
+      {reviewOpen && (
+        <ReviewModal
+          label={label}
+          fileName={fileName ?? ''}
+          fields={fields}
+          headers={headers}
+          body={body}
+          mapping={mapping}
+          firstRowHeader={firstRowHeader}
+          importable={fullBuild.rows.length}
+          warnings={fullBuild.warnings}
+          onToggleHeader={toggleHeader}
+          onSetField={setField}
+          onEditCell={editCell}
+          onImport={doImport}
+          onClose={() => setReviewOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+/** Full-width modal: map columns (with format hints), fix cells in place, import. */
+function ReviewModal({
+  label,
+  fileName,
+  fields,
+  headers,
+  body,
+  mapping,
+  firstRowHeader,
+  importable,
+  warnings,
+  onToggleHeader,
+  onSetField,
+  onEditCell,
+  onImport,
+  onClose,
+}: {
+  label: string
+  fileName: string
+  fields: FieldSpec[]
+  headers: string[]
+  body: string[][]
+  mapping: ColumnMapping
+  firstRowHeader: boolean
+  importable: number
+  warnings: string[]
+  onToggleHeader: (next: boolean) => void
+  onSetField: (key: string, col: number) => void
+  onEditCell: (bodyIndex: number, col: number, value: string) => void
+  onImport: () => void
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const shown = body.slice(0, PREVIEW_ROWS)
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div
+        className="modal modal--xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Review ${label} import`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal__head">
+          <strong>
+            Import {label.toLowerCase()} · <span className="muted">{fileName}</span>
+          </strong>
+          <button className="modal__close" onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </div>
+
+        <div className="modal__body review">
           <label className="import__headertoggle">
             <input
               type="checkbox"
               checked={firstRowHeader}
-              onChange={(e) => toggleHeader(e.target.checked)}
+              onChange={(e) => onToggleHeader(e.target.checked)}
             />{' '}
             First row is a header
           </label>
 
-          <div className="import__fields">
+          <div className="review__fields">
             {fields.map((f) => (
-              <label key={f.key} className="import__field">
-                <span>
-                  {f.label}
-                  {f.required && <span className="import__req"> *</span>}
-                </span>
-                <select
-                  value={mapping[f.key] ?? -1}
-                  aria-label={`Map ${label} ${f.label}`}
-                  onChange={(e) => setField(f.key, Number(e.target.value))}
-                >
-                  <option value={-1}>(none)</option>
-                  {headers.map((h, i) => (
-                    <option key={i} value={i}>
-                      {h}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div key={f.key} className="review__field">
+                <label>
+                  <span className="review__fieldlabel">
+                    {f.label}
+                    {f.required && <span className="import__req"> *</span>}
+                  </span>
+                  <select
+                    value={mapping[f.key] ?? -1}
+                    aria-label={`Map ${label} ${f.label}`}
+                    onChange={(e) => onSetField(f.key, Number(e.target.value))}
+                  >
+                    <option value={-1}>(none)</option>
+                    {headers.map((h, i) => (
+                      <option key={i} value={i}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <p className="review__hint">{f.hint}</p>
+              </div>
             ))}
           </div>
 
-          <table className="import__preview">
-            <thead>
-              <tr>
-                {fields.map((f) => (
-                  <th key={f.key}>{f.label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {preview.rows.map((row, i) => (
-                <tr key={i}>
+          <p className="review__tablenote muted">
+            Click any cell to fix it before importing — edits apply to this import only, not your
+            original file.
+            {body.length > PREVIEW_ROWS &&
+              ` Showing the first ${PREVIEW_ROWS} of ${body.length} rows; all rows are imported.`}
+          </p>
+          <div className="review__tablewrap">
+            <table className="review__table">
+              <thead>
+                <tr>
+                  <th className="review__rownum">#</th>
                   {fields.map((f) => (
-                    <td key={f.key}>
-                      {String((row as Record<string, unknown>)[f.key] ?? '').slice(0, 60)}
-                    </td>
+                    <th key={f.key} className={mapping[f.key] >= 0 ? undefined : 'review__unmapped'}>
+                      {f.label}
+                      {mapping[f.key] < 0 && <span className="review__unmappedtag"> not mapped</span>}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="import__actions">
-            <button className="btn" onClick={doImport} disabled={fullBuild.rows.length === 0}>
-              Import {fullBuild.rows.length} {label.toLowerCase()}
-            </button>
-            {fullBuild.rows.length < body.length && (
-              <span className="import__skipnote">
-                {body.length - fullBuild.rows.length} of {body.length} rows will be skipped
-              </span>
-            )}
+              </thead>
+              <tbody>
+                {shown.map((row, i) => (
+                  <tr key={i}>
+                    <td className="review__rownum">{i + 1}</td>
+                    {fields.map((f) => {
+                      const col = mapping[f.key]
+                      if (col < 0) {
+                        return (
+                          <td key={f.key} className="review__unmapped">
+                            —
+                          </td>
+                        )
+                      }
+                      return (
+                        <td key={f.key}>
+                          <input
+                            className="review__cell"
+                            value={row[col] ?? ''}
+                            aria-label={`${f.label}, row ${i + 1}`}
+                            onChange={(e) => onEditCell(i, col, e.target.value)}
+                          />
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          {fullWarnings.length > 0 && (
+          {warnings.length > 0 && (
             <details className="import__warnings">
               <summary className="import__warncount">
-                <WarningIcon /> {fullWarnings.length} warning(s) — click to review before
-                importing
+                <WarningIcon /> {warnings.length} warning(s) — click to review
               </summary>
               <ul aria-label={`${label} import warnings`}>
-                {fullWarnings.slice(0, 10).map((w, i) => (
+                {warnings.slice(0, 10).map((w, i) => (
                   <li key={i}>{w}</li>
                 ))}
-                {fullWarnings.length > 10 && (
-                  <li className="muted">…and {fullWarnings.length - 10} more</li>
+                {warnings.length > 10 && (
+                  <li className="muted">…and {warnings.length - 10} more</li>
                 )}
               </ul>
             </details>
           )}
-        </>
-      )}
+        </div>
+
+        <div className="modal__foot">
+          {importable < body.length && (
+            <span className="import__skipnote">
+              {body.length - importable} of {body.length} rows will be skipped
+            </span>
+          )}
+          <button className="btn btn--ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn" onClick={onImport} disabled={importable === 0}>
+            Import {importable} {label.toLowerCase()}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
