@@ -1652,6 +1652,63 @@ details.warnings summary {
   border-color: #c0392b;
   box-shadow: 0 0 0 1px #c0392b;
 }
+/* Hover popover with a reviewer's uploaded details (portalled to <body>). */
+.reviewer-pop {
+  position: fixed;
+  z-index: 200;
+  width: 280px;
+  max-width: calc(100vw - 16px);
+  padding: 0.6rem 0.7rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  font-size: 0.82rem;
+  pointer-events: none;
+  animation: reviewer-pop-in 0.12s ease-out;
+}
+.reviewer-pop--above {
+  transform: translateY(-100%);
+}
+@keyframes reviewer-pop-in {
+  from {
+    opacity: 0;
+  }
+}
+.reviewer-pop__name {
+  display: block;
+  font-size: 0.9rem;
+}
+.reviewer-pop__meta {
+  margin-top: 0.1rem;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+.reviewer-pop__role {
+  text-transform: capitalize;
+}
+.reviewer-pop__stats {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.reviewer-pop__stat--over {
+  color: #c0392b;
+}
+.reviewer-pop__crit {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Current-load badge on each reviewer chip (assigned / limit). */
 .card__load {
   flex-shrink: 0;

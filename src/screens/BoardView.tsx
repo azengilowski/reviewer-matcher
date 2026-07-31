@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import {
   DndContext,
@@ -53,6 +54,7 @@ export function BoardView({ run }: { run: MatchRun }) {
     toggleLock,
   } = useApp()
   const nameById = useMemo(() => new Map(reviewers.map((r) => [r.id, r.name])), [reviewers])
+  const reviewerById = useMemo(() => new Map(reviewers.map((r) => [r.id, r])), [reviewers])
   // Each reviewer's current load vs their limit, for the chip badges + overload cue.
   const loadById = useMemo(
     () => new Map(reviewers.map((r) => [r.id, reviewerLoadStatus(assignments, r, settings)])),
@@ -394,6 +396,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                   locked={locked}
                   highlight={reviewerMatches(a.reviewerId)}
                   load={loadById.get(a.reviewerId)}
+                  reviewer={reviewerById.get(a.reviewerId)}
                   onRemove={locked ? undefined : () => removeAssignment(paper.id, a.reviewerId)}
                 />
               ))}
@@ -417,6 +420,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                 name={r.name}
                 highlight={reviewerMatches(r.id)}
                 load={loadById.get(r.id)}
+                reviewer={r}
               />
             ))}
             {idleReviewers.length === 0 && <div className="col__empty">(none)</div>}
@@ -652,6 +656,7 @@ function Card({
   locked,
   highlight,
   load,
+  reviewer,
   onRemove,
 }: {
   source: string
@@ -663,6 +668,7 @@ function Card({
   locked?: boolean
   highlight?: boolean
   load?: { used: number; limit: number; over: boolean }
+  reviewer?: Reviewer
   onRemove?: () => void
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -683,14 +689,74 @@ function Card({
   ]
     .filter(Boolean)
     .join(' · ')
+
+  // Rich hover popover with the reviewer's uploaded details, positioned to the
+  // chip and portalled to <body> so it never clips inside the scrolling board.
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [pop, setPop] = useState<{ left: number; top: number; above: boolean } | null>(null)
+  function showPop() {
+    const r = cardRef.current?.getBoundingClientRect()
+    if (!r) return
+    const above = window.innerHeight - r.bottom < 220
+    setPop({
+      left: Math.max(8, Math.min(r.left, window.innerWidth - 300)),
+      top: above ? r.top - 8 : r.bottom + 8,
+      above,
+    })
+  }
+  const hidePop = () => setPop(null)
+  useEffect(() => {
+    if (isDragging) setPop(null)
+  }, [isDragging])
+
   return (
     <div
-      ref={setNodeRef}
-      title={title}
+      ref={(el) => {
+        setNodeRef(el)
+        cardRef.current = el
+      }}
+      aria-label={title}
+      onMouseEnter={showPop}
+      onMouseLeave={hidePop}
       className={`card${isDragging ? ' card--dragging' : ''}${manual ? ' card--manual' : ''}${locked ? ' card--locked' : ''}${highlight ? ' card--match' : ''}${over ? ' card--over' : ''}`}
       {...listeners}
       {...attributes}
     >
+      {pop &&
+        reviewer &&
+        createPortal(
+          <div
+            role="tooltip"
+            className={`reviewer-pop${pop.above ? ' reviewer-pop--above' : ''}`}
+            style={{ left: pop.left, top: pop.top }}
+          >
+            <strong className="reviewer-pop__name">{reviewer.name}</strong>
+            <div className="reviewer-pop__meta">
+              <span className="reviewer-pop__role">{reviewer.role}</span>
+              {reviewer.institution && <span> · {reviewer.institution}</span>}
+              <span className="muted"> · {reviewer.id}</span>
+            </div>
+            {(score != null || load) && (
+              <div className="reviewer-pop__stats">
+                {score != null && (
+                  <span className="reviewer-pop__stat">
+                    match <strong>{score.toFixed(2)}</strong>
+                    {rank ? ` · #${rank} here` : ''}
+                  </span>
+                )}
+                {load && (
+                  <span className={`reviewer-pop__stat${over ? ' reviewer-pop__stat--over' : ''}`}>
+                    load <strong>{load.used}/{load.limit}</strong>
+                  </span>
+                )}
+              </div>
+            )}
+            {reviewer.criteria && (
+              <p className="reviewer-pop__crit">{reviewer.criteria}</p>
+            )}
+          </div>,
+          document.body,
+        )}
       <span className="card__name">{name}</span>
       {load && (
         <span className={`card__load${over ? ' card__load--over' : ''}`} aria-hidden="true">
