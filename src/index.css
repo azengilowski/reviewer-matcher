@@ -1646,6 +1646,26 @@ details.warnings summary {
   border-color: #e0a800;
   box-shadow: 0 0 0 1px #e0a800;
 }
+/* Reviewer over their paper limit: red tint + outline. */
+.card--over {
+  background: #fdeaea;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 1px #c0392b;
+}
+/* Current-load badge on each reviewer chip (assigned / limit). */
+.card__load {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 0.02rem 0.32rem;
+}
+.card__load--over {
+  color: #fff;
+  background: #c0392b;
+}
 .card__name {
   flex: 1;
   overflow: hidden;

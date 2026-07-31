@@ -53,6 +53,11 @@ export function BoardView({ run }: { run: MatchRun }) {
     toggleLock,
   } = useApp()
   const nameById = useMemo(() => new Map(reviewers.map((r) => [r.id, r.name])), [reviewers])
+  // Each reviewer's current load vs their limit, for the chip badges + overload cue.
+  const loadById = useMemo(
+    () => new Map(reviewers.map((r) => [r.id, reviewerLoadStatus(assignments, r, settings)])),
+    [reviewers, assignments, settings],
+  )
   const lockedSet = useMemo(() => new Set(lockedPapers), [lockedPapers])
   const [filter, setFilter] = useState<PaperFilter>('all')
   const [sortKey, setSortKey] = useState<SortKey>('id')
@@ -388,6 +393,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                   manual={a.source === 'manual'}
                   locked={locked}
                   highlight={reviewerMatches(a.reviewerId)}
+                  load={loadById.get(a.reviewerId)}
                   onRemove={locked ? undefined : () => removeAssignment(paper.id, a.reviewerId)}
                 />
               ))}
@@ -410,6 +416,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                 reviewerId={r.id}
                 name={r.name}
                 highlight={reviewerMatches(r.id)}
+                load={loadById.get(r.id)}
               />
             ))}
             {idleReviewers.length === 0 && <div className="col__empty">(none)</div>}
@@ -644,6 +651,7 @@ function Card({
   manual,
   locked,
   highlight,
+  load,
   onRemove,
 }: {
   source: string
@@ -654,25 +662,41 @@ function Card({
   manual?: boolean
   locked?: boolean
   highlight?: boolean
+  load?: { used: number; limit: number; over: boolean }
   onRemove?: () => void
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: dragId(source, reviewerId),
     disabled: locked,
   })
-  const title =
+  const over = load?.over ?? false
+  const loadText = load
+    ? over
+      ? `overloaded: assigned ${load.used} papers, limit ${load.limit}`
+      : `assigned ${load.used} of ${load.limit} papers`
+    : null
+  const title = [
     score != null
       ? `${name}: match score ${score.toFixed(3)}${rank ? `, this paper's #${rank} choice` : ''}`
-      : name
+      : name,
+    loadText,
+  ]
+    .filter(Boolean)
+    .join(' · ')
   return (
     <div
       ref={setNodeRef}
       title={title}
-      className={`card${isDragging ? ' card--dragging' : ''}${manual ? ' card--manual' : ''}${locked ? ' card--locked' : ''}${highlight ? ' card--match' : ''}`}
+      className={`card${isDragging ? ' card--dragging' : ''}${manual ? ' card--manual' : ''}${locked ? ' card--locked' : ''}${highlight ? ' card--match' : ''}${over ? ' card--over' : ''}`}
       {...listeners}
       {...attributes}
     >
       <span className="card__name">{name}</span>
+      {load && (
+        <span className={`card__load${over ? ' card__load--over' : ''}`} aria-hidden="true">
+          {load.used}/{load.limit}
+        </span>
+      )}
       {manual && <span className="card__manual" title="Manually assigned">✎</span>}
       {rank != null && rank > 0 && <span className="card__rank">#{rank}</span>}
       {onRemove && (
