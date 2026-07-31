@@ -85,8 +85,7 @@ function PointIcon({ kind }: { kind: 'lock' | 'spark' | 'hand' }) {
       height="17"
       fill="none"
       stroke="var(--accent)"
-      // Heavier stroke so the line icons carry the weight of the bold labels.
-      strokeWidth="2.6"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"

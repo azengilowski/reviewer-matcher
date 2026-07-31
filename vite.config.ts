@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'Peerfect Match',
         short_name: 'Peerfect',
         description: 'Match academic reviewers to papers. Runs entirely in your browser.',
-        theme_color: '#2f5fe0',
+        theme_color: '#2563eb',
         background_color: '#f7f7f8',
         display: 'standalone',
         start_url: './',
