@@ -7,10 +7,22 @@ import { useApp } from '../state/AppStore'
 import { NumberField } from './NumberField'
 import { ScreenShell } from './ScreenShell'
 
+/** Discrete method-boost levels for the segmented toggle. */
+const BOOST_OPTIONS: { value: number; label: string; title: string }[] = [
+  { value: 0, label: 'Off', title: 'Topic similarity only' },
+  { value: 0.1, label: 'Low', title: 'A gentle nudge toward matching methodology' },
+  { value: 0.2, label: 'Medium', title: 'Methodology fit counts noticeably' },
+  { value: 0.3, label: 'High', title: 'Methodology fit weighs heavily' },
+]
+
 export function SettingsScreen() {
   const { reviewers, papers, settings, setSettings, setSettingsInvalid } = useApp()
   const feasibility = computeFeasibility(reviewers, papers, settings)
   const isDefault = JSON.stringify(settings) === JSON.stringify(DEFAULT_SETTINGS)
+  // Highlight the option nearest the stored value (handles legacy slider values).
+  const activeBoost = BOOST_OPTIONS.reduce((best, o) =>
+    Math.abs(o.value - settings.methodBoost) < Math.abs(best.value - settings.methodBoost) ? o : best,
+  )
 
   // Fields currently holding an empty/invalid draft. The store only ever sees
   // valid values; this set gates "Next: Match" until every field is filled in.
@@ -49,19 +61,18 @@ export function SettingsScreen() {
       title="Configure"
       intro="Configure how the match runs. Changes apply to the next run."
     >
-      <div className="settings-topbar">
-        <button
-          className="btn btn--ghost btn--sm"
-          onClick={resetToDefaults}
-          disabled={isDefault}
-          title="Restore every setting to its default value"
-        >
-          Reset to defaults
-        </button>
-      </div>
-
       <section className="settings-group" key={fieldsEpoch}>
-        <h3>Capacity &amp; load</h3>
+        <div className="settings-group__head">
+          <h3>Capacity &amp; load</h3>
+          <button
+            className="btn btn--ghost btn--sm"
+            onClick={resetToDefaults}
+            disabled={isDefault}
+            title="Restore every setting to its default value"
+          >
+            Reset to defaults
+          </button>
+        </div>
         <label className="settings-field">
           <span>Reviewers per paper (default capacity)</span>
           <NumberField
@@ -133,23 +144,31 @@ export function SettingsScreen() {
             ))}
           </select>
         </label>
-        <p className="muted settings-hint">
+        <p className="muted settings-hint settings-hint--gap">
           Larger models download more and aren't necessarily better. On the AERA test set
           MiniLM-L6 (the default) matched the human panel best. Switching models re-downloads
           and requires a re-run.
         </p>
-        <label className="settings-field">
-          <span>Method-match boost ({settings.methodBoost.toFixed(2)})</span>
-          <input
-            type="range"
-            min={0}
-            max={0.3}
-            step={0.02}
-            value={settings.methodBoost}
-            aria-label="Method-match boost"
-            onChange={(e) => update({ methodBoost: Number(e.target.value) })}
-          />
-        </label>
+        <div className="settings-field">
+          <span>Method-match boost</span>
+          <div className="seg" role="group" aria-label="Method-match boost">
+            {BOOST_OPTIONS.map((o) => {
+              const on = o.value === activeBoost.value
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  className={on ? 'seg__btn seg__btn--on' : 'seg__btn'}
+                  aria-pressed={on}
+                  onClick={() => update({ methodBoost: o.value })}
+                  title={o.title}
+                >
+                  {o.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
         <p className="muted settings-hint">
           Adds a bonus when a reviewer's expertise mentions the paper's methodology (e.g.
           Qualitative), so methodology fit counts alongside topic similarity.
@@ -165,8 +184,8 @@ export function SettingsScreen() {
             type="checkbox"
             checked={settings.excludeSelfAuthorship}
             onChange={(e) => update({ excludeSelfAuthorship: e.target.checked })}
-          />{' '}
-          Exclude reviewers from papers they authored
+          />
+          <span>Exclude reviewers from papers they authored</span>
         </label>
         <label className="settings-field">
           <span>Random seed (for reproducible runs)</span>
@@ -199,65 +218,97 @@ function OverridesPanel() {
     [papers, q],
   )
 
+  const hasData = reviewers.length > 0 || papers.length > 0
+
   return (
     <details className="settings-group">
       <summary>
         <h3 style={{ display: 'inline' }}>Advanced: per-item overrides</h3>
       </summary>
-      <input
-        type="search"
-        placeholder="Filter by name / id…"
-        aria-label="Filter overrides"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-        className="settings-filter"
-      />
-      <div className="overrides-grid">
-        <div>
-          <strong>Reviewer load</strong>
-          <div className="overrides-list">
-            {shownReviewers.map((r) => (
-              <label key={r.id} className="overrides-row">
-                <span title={r.id}>{r.name}</span>
-                <input
-                  type="number"
-                  min={0}
-                  placeholder={String(loadForReviewer({ ...r, loadOverride: undefined }, settings))}
-                  value={r.loadOverride ?? ''}
-                  aria-label={`Load override for ${r.name}`}
-                  onWheel={(e) => e.currentTarget.blur()}
-                  onChange={(e) => {
-                    const v = e.target.value === '' ? undefined : Math.max(0, Number(e.target.value) || 0)
-                    setReviewers(reviewers.map((x) => (x.id === r.id ? { ...x, loadOverride: v } : x)))
-                  }}
-                />
-              </label>
-            ))}
-          </div>
+
+      {!hasData ? (
+        <div className="overrides-empty">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="var(--muted)" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+            <line x1="4" y1="8" x2="20" y2="8" />
+            <circle cx="9" cy="8" r="2.4" fill="var(--surface)" />
+            <line x1="4" y1="16" x2="20" y2="16" />
+            <circle cx="15" cy="16" r="2.4" fill="var(--surface)" />
+          </svg>
+          <p>
+            Nothing to override yet. Import reviewers and papers on the Upload step, then fine-tune
+            individual loads and capacities here.
+          </p>
         </div>
-        <div>
-          <strong>Paper capacity</strong>
-          <div className="overrides-list">
-            {shownPapers.map((p) => (
-              <label key={p.id} className="overrides-row">
-                <span title={p.id}>{p.title || p.id}</span>
-                <input
-                  type="number"
-                  min={1}
-                  placeholder={String(capacityForPaper({ ...p, capacityOverride: undefined }, settings))}
-                  value={p.capacityOverride ?? ''}
-                  aria-label={`Capacity override for ${p.id}`}
-                  onWheel={(e) => e.currentTarget.blur()}
-                  onChange={(e) => {
-                    const v = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value) || 1)
-                    setPapers(papers.map((x) => (x.id === p.id ? { ...x, capacityOverride: v } : x)))
-                  }}
-                />
-              </label>
-            ))}
+      ) : (
+        <>
+          <input
+            type="search"
+            placeholder="Filter by name / id…"
+            aria-label="Filter overrides"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="settings-filter"
+          />
+          <div className="overrides-grid">
+            <div>
+              <strong>Reviewer load</strong>
+              <div className="overrides-list">
+                {shownReviewers.length === 0 ? (
+                  <p className="overrides-none">
+                    {reviewers.length === 0 ? 'No reviewers loaded.' : `No reviewers match “${filter.trim()}”.`}
+                  </p>
+                ) : (
+                  shownReviewers.map((r) => (
+                    <label key={r.id} className="overrides-row">
+                      <span title={r.id}>{r.name}</span>
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder={String(loadForReviewer({ ...r, loadOverride: undefined }, settings))}
+                        value={r.loadOverride ?? ''}
+                        aria-label={`Load override for ${r.name}`}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        onChange={(e) => {
+                          const v = e.target.value === '' ? undefined : Math.max(0, Number(e.target.value) || 0)
+                          setReviewers(reviewers.map((x) => (x.id === r.id ? { ...x, loadOverride: v } : x)))
+                        }}
+                      />
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+            <div>
+              <strong>Paper capacity</strong>
+              <div className="overrides-list">
+                {shownPapers.length === 0 ? (
+                  <p className="overrides-none">
+                    {papers.length === 0 ? 'No papers loaded.' : `No papers match “${filter.trim()}”.`}
+                  </p>
+                ) : (
+                  shownPapers.map((p) => (
+                    <label key={p.id} className="overrides-row">
+                      <span title={p.id}>{p.title || p.id}</span>
+                      <input
+                        type="number"
+                        min={1}
+                        placeholder={String(capacityForPaper({ ...p, capacityOverride: undefined }, settings))}
+                        value={p.capacityOverride ?? ''}
+                        aria-label={`Capacity override for ${p.id}`}
+                        onWheel={(e) => e.currentTarget.blur()}
+                        onChange={(e) => {
+                          const v = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value) || 1)
+                          setPapers(papers.map((x) => (x.id === p.id ? { ...x, capacityOverride: v } : x)))
+                        }}
+                      />
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </details>
   )
 }

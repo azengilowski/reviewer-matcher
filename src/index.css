@@ -984,11 +984,6 @@ details.warnings summary {
 }
 
 /* Settings */
-.settings-topbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.75rem;
-}
 .settings-group {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -999,6 +994,17 @@ details.warnings summary {
 .settings-group h3 {
   margin: 0 0 0.75rem;
   font-size: 1rem;
+}
+/* Section header row: title on the left, an action (e.g. reset) on the right. */
+.settings-group__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.settings-group__head h3 {
+  margin: 0;
 }
 .settings-field {
   display: flex;
@@ -1114,14 +1120,93 @@ details.warnings summary {
   margin: 0.5rem 0 0;
 }
 .settings-check {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   font-size: 0.9rem;
   margin-bottom: 0.6rem;
+  cursor: pointer;
+  width: fit-content;
+}
+/* Custom checkbox: rounded box that fills with the accent + a white check. */
+.settings-check input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin: 0;
+  display: inline-grid;
+  place-content: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.settings-check input[type='checkbox']::before {
+  content: '';
+  width: 11px;
+  height: 11px;
+  background: #fff;
+  transform: scale(0);
+  transition: transform 0.12s ease;
+  clip-path: polygon(14% 46%, 0 62%, 42% 100%, 100% 18%, 84% 4%, 40% 66%);
+}
+.settings-check input[type='checkbox']:hover {
+  border-color: var(--accent);
+}
+.settings-check input[type='checkbox']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.settings-check input[type='checkbox']:checked::before {
+  transform: scale(1);
+}
+.settings-check input[type='checkbox']:focus-visible {
+  box-shadow: var(--focus-ring);
 }
 .settings-hint {
   font-size: 0.8rem;
   margin: 0.35rem 0 0;
   max-width: 60ch;
+}
+/* Extra breathing room between a control and its hint below it. */
+.settings-hint--gap {
+  margin-top: 0.85rem;
+}
+
+/* Segmented toggle group (e.g. method-match boost levels). */
+.seg {
+  display: inline-flex;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface);
+}
+.seg__btn {
+  appearance: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  background: transparent;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.seg__btn:first-child {
+  border-left: none;
+}
+.seg__btn:hover:not(.seg__btn--on) {
+  background: var(--bg);
+  color: var(--text);
+}
+.seg__btn--on {
+  background: var(--accent-weak);
+  color: var(--accent);
+  font-weight: 600;
 }
 .settings-field select {
   min-width: 14rem;
@@ -1136,6 +1221,30 @@ details.warnings summary {
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
   margin: 0.5rem 0;
+}
+/* Whole-panel empty state (no data loaded). */
+.overrides-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem 0.75rem;
+  color: var(--muted);
+}
+.overrides-empty p {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+/* Per-column empty state (a filter matched nothing, or one side is empty). */
+.overrides-none {
+  margin: 0;
+  padding: 0.9rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
 }
 .overrides-grid {
   display: grid;
