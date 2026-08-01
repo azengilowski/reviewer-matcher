@@ -2086,7 +2086,7 @@ details.warnings summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 0.6rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 .tile {
   background: var(--surface);
@@ -2119,6 +2119,11 @@ details.warnings summary {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   padding: 0.85rem 1rem;
+}
+/* A chart card used as a standalone block (not inside a grid) needs the same
+   vertical rhythm as the grids around it. */
+.screen > .chart-card {
+  margin-bottom: 1rem;
 }
 .chart-card__title {
   margin: 0 0 0.6rem;
