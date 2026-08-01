@@ -45,6 +45,12 @@ export function MatchScreen() {
       title="Match"
       intro="Run the match, then drag reviewers to fine-tune. Assignments update live."
     >
+      {(run || status === 'running') && (
+        <p className="match-count">
+          {reviewers.length} reviewers · {papers.length} papers
+        </p>
+      )}
+
       {run || status === 'running' ? null : (
         <div className="match-hero">
           <MatchHeroArt />
@@ -146,9 +152,6 @@ export function MatchScreen() {
               </div>
             )
           )}
-          <span className="match-summary">
-            {reviewers.length} reviewers · {papers.length} papers
-          </span>
         </div>
       )}
       {status === 'error' && <p className="match-error">⚠️ {error}</p>}

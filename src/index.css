@@ -7,7 +7,7 @@
   --accent: #2563eb;
   --accent-strong: #1d4ed8;
   --accent-weak: #e8f0fe;
-  --bar-h: 3rem;
+  --bar-h: 3.5rem;
   /* Radius scale: controls, cards, containers. */
   --r-sm: 6px;
   --r-md: 8px;
@@ -110,14 +110,22 @@ body {
 }
 
 .app__header {
+  height: var(--bar-h);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+/* Header content shares the same max-width + padding as the page and footer,
+   so the wordmark, page titles, and footer button all line up. */
+.app__header-inner {
   display: flex;
   align-items: center;
   gap: 1rem;
-  height: var(--bar-h);
-  flex-shrink: 0;
-  padding: 0 1.25rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  height: 100%;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
 .app__title {
@@ -325,11 +333,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 0.55rem;
   height: 100%;
   max-width: 1100px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 1.25rem;
+  padding: 0 1.5rem;
+}
+.step-footer__label {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 /* Export step cards */
@@ -569,10 +582,11 @@ body {
   border-color: #a93226;
 }
 /* Smaller tier for utility controls (undo/redo). */
+/* Compact secondary buttons (undo/redo, reset, review). Same 36px height as
+   every other button — just tighter padding and lighter text. */
 .btn--sm {
-  height: 30px;
-  padding: 0 0.65rem;
-  font-size: 0.82rem;
+  padding: 0 0.7rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 .btn--file {
@@ -659,11 +673,11 @@ body {
   min-height: 44px;
   margin-bottom: 0.75rem;
 }
-.match-summary {
-  margin-left: auto;
+/* Input summary, snug under the intro (pulled up past the header's margin). */
+.match-count {
+  margin: -0.65rem 0 0.85rem;
   color: var(--muted);
   font-size: 0.85rem;
-  white-space: nowrap;
 }
 /* Pre-run empty state: an inviting centered hero instead of a lone button. */
 .match-hero {

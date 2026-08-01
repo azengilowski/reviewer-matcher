@@ -3,7 +3,7 @@ import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-r
 import { AppStoreProvider, useApp } from './state/AppStore'
 import { HomeScreen } from './screens/HomeScreen'
 import { HowItWorksModal } from './screens/HowItWorks'
-import { Logo, Wordmark } from './screens/Logo'
+import { Wordmark } from './screens/Logo'
 import { Stepper } from './screens/Stepper'
 import { StepFooter } from './screens/StepFooter'
 import { UploadScreen } from './screens/UploadScreen'
@@ -37,9 +37,9 @@ function AppShell() {
   return (
     <div className="app">
       <header className="app__header">
+        <div className="app__header-inner">
         <h1 className="app__title">
           <Link to="/" className="app__homelink" title="Home">
-            <Logo />
             <Wordmark />
           </Link>
         </h1>
@@ -94,6 +94,7 @@ function AppShell() {
           </svg>
           <span className="app__help-label">How it works</span>
         </button>
+        </div>
       </header>
       {showHelp && <HowItWorksModal onClose={() => setShowHelp(false)} />}
       {showReset && (

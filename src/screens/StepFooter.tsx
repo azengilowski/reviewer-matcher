@@ -33,13 +33,14 @@ export function StepFooter() {
   return (
     <div className="step-footer">
       <div className="step-footer__inner">
+        <span className="step-footer__label">Next →</span>
         {complete ? (
           <Link className="btn" to={next.to}>
-            Next: {next.label} →
+            {next.label}
           </Link>
         ) : (
-          <button className="btn" disabled title={reason} aria-label={reason}>
-            Next: {next.label} →
+          <button className="btn" disabled title={reason} aria-label={`Next: ${next.label}. ${reason}`}>
+            {next.label}
           </button>
         )}
       </div>
