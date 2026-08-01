@@ -12,7 +12,7 @@ export function HomeScreen() {
 
   return (
     <div className="home">
-      <Logo size={72} />
+      <Logo size={112} heart />
       <h2 className="home__title">
         <Wordmark />
       </h2>

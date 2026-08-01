@@ -1,9 +1,20 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { computeDashboard, type Bar, type Pairing } from '../analytics/stats'
+import { capacityForPaper } from '../domain/settings'
+import type { Paper, Reviewer } from '../domain/types'
+import {
+  averagePaperScore,
+  papersForReviewer,
+  reviewerLoadStatus,
+} from '../editing/validation'
 import { useApp } from '../state/AppStore'
 import { EmptyState } from './EmptyState'
 import { ReviewSubnav } from './ReviewSubnav'
 import { ScreenShell } from './ScreenShell'
+
+/** A weak-match threshold: papers whose average similarity is below this need a look. */
+const WEAK_SCORE = 0.4
 
 export function DashboardScreen() {
   const { reviewers, papers, settings, run, assignments, runHistory } = useApp()
@@ -12,6 +23,25 @@ export function DashboardScreen() {
     () => (run ? computeDashboard(reviewers, papers, settings, run, assignments) : null),
     [reviewers, papers, settings, run, assignments],
   )
+  // The specific items behind the warning counts, so the review is actionable.
+  const attention = useMemo(() => {
+    if (!run) return null
+    const paperInfo = papers.map((p) => ({
+      p,
+      cap: capacityForPaper(p, settings),
+      used: assignments.filter((a) => a.paperId === p.id).length,
+      score: averagePaperScore(run, assignments, p.id),
+    }))
+    return {
+      unfilled: paperInfo.filter((x) => x.used < x.cap),
+      overCap: paperInfo.filter((x) => x.used > x.cap),
+      weak: paperInfo.filter((x) => x.used > 0 && x.score != null && x.score < WEAK_SCORE),
+      overloaded: reviewers
+        .map((r) => ({ r, s: reviewerLoadStatus(assignments, r, settings) }))
+        .filter((x) => x.s.over),
+      idle: reviewers.filter((r) => papersForReviewer(assignments, r.id).length === 0),
+    }
+  }, [run, papers, reviewers, assignments, settings])
   const autoStats = useMemo(
     () => (run ? computeDashboard(reviewers, papers, settings, run, run.assignments) : null),
     [reviewers, papers, settings, run],
@@ -39,6 +69,8 @@ export function DashboardScreen() {
       intro="How well the match went: load, preference satisfaction, and outliers."
       nav={<ReviewSubnav />}
     >
+      {attention && <NeedsAttention a={attention} />}
+
       <div className="stat-tiles">
         <Tile label="Assignments" value={stats.assignments} />
         <Tile label="Reviewers get #1" value={`${Math.round(stats.pctTop1)}%`} />
@@ -124,6 +156,157 @@ export function DashboardScreen() {
         </ChartCard>
       )}
     </ScreenShell>
+  )
+}
+
+type PaperInfo = { p: Paper; cap: number; used: number; score: number | null }
+type Attn = {
+  unfilled: PaperInfo[]
+  overCap: PaperInfo[]
+  weak: PaperInfo[]
+  overloaded: { r: Reviewer; s: { used: number; limit: number; over: boolean } }[]
+  idle: Reviewer[]
+}
+
+const paperLink = (id: string) => `/details?mode=paper&id=${encodeURIComponent(id)}`
+const reviewerLink = (id: string) => `/details?mode=reviewer&id=${encodeURIComponent(id)}`
+
+/** Actionable outliers, each linking to its Details view to investigate/fix. */
+function NeedsAttention({ a }: { a: Attn }) {
+  const total =
+    a.unfilled.length + a.overCap.length + a.weak.length + a.overloaded.length + a.idle.length
+  return (
+    <section className="attention chart-card">
+      <div className="attention__head">
+        <h3 className="chart-card__title">Needs attention</h3>
+        {total > 0 && <span className="attention__count">{total}</span>}
+      </div>
+      {total === 0 ? (
+        <p className="attention__clear">
+          <CheckIcon /> Everything looks good — every paper is filled, no reviewer is overloaded, and
+          all matches are solid.
+        </p>
+      ) : (
+        <div className="attention__groups">
+          <AttentionGroup
+            tone="warn"
+            title="Papers unfilled"
+            hint="fewer reviewers than capacity"
+            items={a.unfilled.map((x) => ({
+              id: x.p.id,
+              label: x.p.id,
+              sub: `${x.used}/${x.cap}`,
+              title: `${x.p.title || x.p.id} — ${x.used} of ${x.cap} reviewers`,
+              to: paperLink(x.p.id),
+            }))}
+          />
+          <AttentionGroup
+            tone="warn"
+            title="Papers over capacity"
+            items={a.overCap.map((x) => ({
+              id: x.p.id,
+              label: x.p.id,
+              sub: `${x.used}/${x.cap}`,
+              title: `${x.p.title || x.p.id} — ${x.used} of ${x.cap} reviewers`,
+              to: paperLink(x.p.id),
+            }))}
+          />
+          <AttentionGroup
+            tone="warn"
+            title="Weak matches"
+            hint={`average similarity below ${WEAK_SCORE.toFixed(2)}`}
+            items={a.weak.map((x) => ({
+              id: x.p.id,
+              label: x.p.id,
+              sub: x.score!.toFixed(2),
+              title: `${x.p.title || x.p.id} — average similarity ${x.score!.toFixed(2)}`,
+              to: paperLink(x.p.id),
+            }))}
+          />
+          <AttentionGroup
+            tone="danger"
+            title="Overloaded reviewers"
+            hint="more papers than their limit"
+            items={a.overloaded.map((x) => ({
+              id: x.r.id,
+              label: x.r.name,
+              sub: `${x.s.used}/${x.s.limit}`,
+              title: `${x.r.name} — assigned ${x.s.used}, limit ${x.s.limit}`,
+              to: reviewerLink(x.r.id),
+            }))}
+          />
+          <AttentionGroup
+            tone="muted"
+            title="Idle reviewers"
+            hint="no papers assigned"
+            items={a.idle.map((r) => ({
+              id: r.id,
+              label: r.name,
+              title: `${r.name} — no papers assigned`,
+              to: reviewerLink(r.id),
+            }))}
+          />
+        </div>
+      )}
+    </section>
+  )
+}
+
+type AttnItem = { id: string; label: string; sub?: string; title: string; to: string }
+
+function AttentionGroup({
+  tone,
+  title,
+  hint,
+  items,
+}: {
+  tone: 'warn' | 'danger' | 'muted'
+  title: string
+  hint?: string
+  items: AttnItem[]
+}) {
+  if (items.length === 0) return null
+  return (
+    <div className="attention__group">
+      <div className="attention__grouphead">
+        <span className={`attention__dot attention__dot--${tone}`} />
+        <strong>
+          {items.length} {title}
+        </strong>
+        {hint && <span className="muted"> · {hint}</span>}
+      </div>
+      <div className="attention__pills">
+        {items.map((it) => (
+          <Link
+            key={it.id}
+            className={`attention__pill attention__pill--${tone}`}
+            to={it.to}
+            title={it.title}
+          >
+            {it.label}
+            {it.sub && <span className="attention__pillsub">{it.sub}</span>}
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="#1a7f37"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20 6 L9 17 l-5 -5" />
+    </svg>
   )
 }
 

@@ -423,7 +423,22 @@ export function BoardView({ run }: { run: MatchRun }) {
                 reviewer={r}
               />
             ))}
-            {idleReviewers.length === 0 && <div className="col__empty">(none)</div>}
+            {idleReviewers.length === 0 && (
+              <div className="tray-empty">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9.5" stroke="#1a7f37" strokeWidth="1.5" />
+                  <path
+                    d="M8 12.4 l2.5 2.6 L16.2 9"
+                    stroke="#1a7f37"
+                    strokeWidth="1.9"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Everyone's assigned</span>
+                <span className="tray-empty__sub">No reviewers left over.</span>
+              </div>
+            )}
           </Column>
         </aside>
       </div>

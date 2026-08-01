@@ -133,7 +133,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.55rem;
   margin: 0;
   flex-shrink: 0;
 }
@@ -376,16 +376,23 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 3.5rem 1rem 2rem;
+  /* Fill the scrollable main so the content sits vertically centred; still
+     scrolls if it ever outgrows the viewport. One uniform gap between the
+     logo, title, tagline, buttons, and feature list. */
+  min-height: 100%;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
   animation: rise-in 0.3s ease backwards;
 }
 .home__title {
-  margin: 1rem 0 0.4rem;
-  font-size: 2.3rem;
+  margin: 0;
+  font-size: clamp(2.5rem, 7.5vw, 4rem);
+  line-height: 1.05;
 }
 .home__tagline {
-  margin: 0 0 1.6rem;
+  margin: 0;
   max-width: 46ch;
   color: var(--muted);
   font-size: 1rem;
@@ -399,7 +406,7 @@ body {
 }
 .home__points {
   list-style: none;
-  margin: 2.5rem 0 0;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -1299,6 +1306,15 @@ details.warnings summary {
 }
 
 /* Board */
+/* Match page: one compact height (32px) for every control in the action bar
+   and board toolbar — Re-run, Undo/Redo, search, sort/filter selects, sort dir.
+   Overrides the global 36px button height here where a denser toolbar fits. */
+.match-bar .btn,
+.board-toolbar .btn,
+.board-toolbar .board-search,
+.board-toolbar select {
+  height: 32px;
+}
 .board-toolbar {
   display: flex;
   align-items: center;
@@ -1312,7 +1328,7 @@ details.warnings summary {
   align-items: flex-start;
 }
 .board-search {
-  height: 30px;
+  height: 32px;
   min-width: 190px;
   padding: 0 0.6rem;
   border: 1px solid var(--border);
@@ -1614,6 +1630,26 @@ details.warnings summary {
   font-size: 0.75rem;
   color: var(--muted);
   padding: 0.4rem 0;
+}
+/* Friendly positive empty state for the Unassigned tray (all reviewers placed). */
+.tray-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.15rem;
+  padding: 1.4rem 0.5rem 1rem;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.tray-empty svg {
+  margin-bottom: 0.35rem;
+}
+.tray-empty__sub {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.76rem;
 }
 .cap {
   font-size: 0.75rem;
@@ -2108,6 +2144,106 @@ details.warnings summary {
 }
 
 /* Dashboard */
+/* "Needs attention": actionable outliers at the top of the review page. */
+.attention {
+  margin-bottom: 1rem;
+}
+.attention__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.attention__head .chart-card__title {
+  margin: 0;
+}
+.attention__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #fdeaea;
+  color: #c0392b;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.attention__clear {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.attention__clear svg {
+  flex-shrink: 0;
+}
+.attention__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.attention__grouphead {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+.attention__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.attention__dot--warn {
+  background: #e0a800;
+}
+.attention__dot--danger {
+  background: #c0392b;
+}
+.attention__dot--muted {
+  background: var(--muted);
+}
+.attention__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.attention__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.attention__pill:hover {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+.attention__pill--warn {
+  border-color: #f0d98c;
+  background: #fff8e6;
+}
+.attention__pill--danger {
+  border-color: #efb9b3;
+  background: #fdeaea;
+}
+.attention__pillsub {
+  font-weight: 700;
+  font-size: 0.74rem;
+  opacity: 0.85;
+}
+
 .stat-tiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
