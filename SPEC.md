@@ -6,9 +6,8 @@
 
 A web app that matches academic reviewers to papers/proposals using a stable-marriage
 (deferred-acceptance) algorithm, then lets an administrator inspect, understand, and hand-tune
-the result through a drag-and-drop UI. It productizes the workflow currently run by hand via
-[`paper_matcher.py`](paper_matcher.py) plus a spreadsheet pass (as seen in
-`2026 AERA Div C 2b Reviewer Assignments - Checks.csv`).
+the result through a drag-and-drop UI. It productizes the workflow originally run by hand via a
+Python script (`paper_matcher.py`, since removed) plus a spreadsheet pass.
 
 ---
 

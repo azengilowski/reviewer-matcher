@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "description": "Client-side reviewer–paper matching app (stable marriage + in-browser embeddings)",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

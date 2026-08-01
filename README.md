@@ -45,3 +45,7 @@ deploys to Pages on push to `main` (set the repository's Pages source to "GitHub
 ## Tech
 
 Vite · React · TypeScript · transformers.js · dnd-kit · Vitest · vite-plugin-pwa.
+
+## License
+
+[MIT](LICENSE) © azengilowski
