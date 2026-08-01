@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import {
   DndContext,
@@ -23,6 +22,7 @@ import {
   reviewerLoadStatus,
 } from '../editing/validation'
 import type { Assignment, MatchRun, Paper, Reviewer } from '../domain/types'
+import { HoverCardPortal, PaperHoverBody, ReviewerHoverBody, useHoverPopover } from './HoverCard'
 import { useApp } from '../state/AppStore'
 
 const UNASSIGNED = 'unassigned'
@@ -661,52 +661,17 @@ function Column({
   )
 }
 
-/**
- * Shared hover-popover positioning: measures the hovered element, portals the
- * card to <body>, flips above when there's no room below, clamps to the
- * viewport. Returns handlers for onMouseEnter/onMouseLeave.
- */
-function useHoverPopover(width = 280) {
-  const [pop, setPop] = useState<{ left: number; top: number; above: boolean } | null>(null)
-  const showPop = (e: React.MouseEvent) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    const above = window.innerHeight - r.bottom < 240
-    setPop({
-      left: Math.max(8, Math.min(r.left, window.innerWidth - (width + 16))),
-      top: above ? r.top - 8 : r.bottom + 8,
-      above,
-    })
-  }
-  const hidePop = () => setPop(null)
-  return { pop, showPop, hidePop, setPop }
-}
-
 /** The paper title on a column header, with a hover card showing its details. */
 function PaperTitle({ paper }: { paper: Paper }) {
   const { pop, showPop, hidePop } = useHoverPopover(320)
   return (
     <div className="col__title" onMouseEnter={showPop} onMouseLeave={hidePop}>
       {paper.title}
-      {pop &&
-        createPortal(
-          <div
-            role="tooltip"
-            className={`hover-card${pop.above ? ' hover-card--above' : ''}`}
-            style={{ left: pop.left, top: pop.top }}
-          >
-            <strong className="hover-card__name">{paper.title || paper.id}</strong>
-            <div className="hover-card__meta">
-              <span className="muted">{paper.id}</span>
-              {paper.method && <span> · {paper.method}</span>}
-            </div>
-            {paper.keywords && <p className="hover-card__tags">{paper.keywords}</p>}
-            {paper.abstract && <p className="hover-card__text">{paper.abstract}</p>}
-            {paper.authors && (
-              <div className="hover-card__authors muted">Authors: {paper.authors}</div>
-            )}
-          </div>,
-          document.body,
-        )}
+      {pop && (
+        <HoverCardPortal pop={pop}>
+          <PaperHoverBody paper={paper} />
+        </HoverCardPortal>
+      )}
     </div>
   )
 }
@@ -772,39 +737,11 @@ function Card({
       {...listeners}
       {...attributes}
     >
-      {pop &&
-        reviewer &&
-        createPortal(
-          <div
-            role="tooltip"
-            className={`hover-card${pop.above ? ' hover-card--above' : ''}`}
-            style={{ left: pop.left, top: pop.top }}
-          >
-            <strong className="hover-card__name">{reviewer.name}</strong>
-            <div className="hover-card__meta">
-              <span className="hover-card__cap">{reviewer.role}</span>
-              {reviewer.institution && <span> · {reviewer.institution}</span>}
-              <span className="muted"> · {reviewer.id}</span>
-            </div>
-            {(score != null || load) && (
-              <div className="hover-card__stats">
-                {score != null && (
-                  <span className="hover-card__stat">
-                    match <strong>{score.toFixed(2)}</strong>
-                    {rank ? ` · #${rank} here` : ''}
-                  </span>
-                )}
-                {load && (
-                  <span className={`hover-card__stat${over ? ' hover-card__stat--over' : ''}`}>
-                    load <strong>{load.used}/{load.limit}</strong>
-                  </span>
-                )}
-              </div>
-            )}
-            {reviewer.criteria && <p className="hover-card__text">{reviewer.criteria}</p>}
-          </div>,
-          document.body,
-        )}
+      {pop && reviewer && (
+        <HoverCardPortal pop={pop}>
+          <ReviewerHoverBody reviewer={reviewer} score={score} rank={rank} load={load} />
+        </HoverCardPortal>
+      )}
       <span className="card__name">{name}</span>
       {load && (
         <span className={`card__load${over ? ' card__load--over' : ''}`} aria-hidden="true">

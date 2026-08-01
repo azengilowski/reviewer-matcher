@@ -2109,6 +2109,63 @@ details.warnings summary {
   border-radius: var(--r-sm);
   max-width: 360px;
 }
+/* Summary card for the selected paper/reviewer on the Details tab. */
+.entity-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+.entity-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.entity-card__title {
+  font-size: 1rem;
+}
+.entity-card__meta {
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+.entity-card__cap {
+  text-transform: capitalize;
+}
+.entity-card__tags {
+  color: var(--accent);
+}
+.entity-card__text {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.entity-card__foot {
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+}
+
+/* Cells with a hover card get a subtle affordance. */
+.hover-target {
+  text-decoration: underline dotted var(--border);
+  text-underline-offset: 3px;
+  cursor: default;
+}
+.hover-target:hover {
+  text-decoration-color: var(--accent);
+}
+
 .pref-table {
   width: 100%;
   border-collapse: collapse;

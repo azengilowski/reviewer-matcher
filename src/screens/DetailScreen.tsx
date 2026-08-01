@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { explainPair, type ChoiceStatus } from '../editing/explain'
-import { reviewerRankOf } from '../editing/validation'
+import {
+  paperCapacityStatus,
+  reviewerLoadStatus,
+  reviewerRankOf,
+} from '../editing/validation'
+import type { Paper, Reviewer } from '../domain/types'
 import { useApp } from '../state/AppStore'
 import { EmptyState } from './EmptyState'
+import { HoverCardPortal, PaperHoverBody, ReviewerHoverBody, useHoverPopover } from './HoverCard'
 import { ReviewSubnav } from './ReviewSubnav'
 import { ScreenShell } from './ScreenShell'
 
@@ -126,25 +132,100 @@ export function DetailScreen() {
       </div>
 
       {mode === 'paper' ? (
-        <PaperDetail
-          paperId={currentId}
-          reviewerMap={reviewerMap}
-          paperMap={paperMap}
-          settings={settings}
-          run={run}
-          assignments={assignments}
-        />
+        <>
+          {paperMap.get(currentId) && (
+            <PaperSummary
+              paper={paperMap.get(currentId)!}
+              used={assignments.filter((a) => a.paperId === currentId).length}
+              limit={paperCapacityStatus(assignments, paperMap.get(currentId)!, settings).limit}
+            />
+          )}
+          <PaperDetail
+            paperId={currentId}
+            reviewerMap={reviewerMap}
+            paperMap={paperMap}
+            settings={settings}
+            run={run}
+            assignments={assignments}
+          />
+        </>
       ) : (
-        <ReviewerDetail
-          reviewerId={currentId}
-          reviewerMap={reviewerMap}
-          paperMap={paperMap}
-          settings={settings}
-          run={run}
-          assignments={assignments}
-        />
+        <>
+          {reviewerMap.get(currentId) && (
+            <ReviewerSummary
+              reviewer={reviewerMap.get(currentId)!}
+              load={reviewerLoadStatus(assignments, reviewerMap.get(currentId)!, settings)}
+            />
+          )}
+          <ReviewerDetail
+            reviewerId={currentId}
+            reviewerMap={reviewerMap}
+            paperMap={paperMap}
+            settings={settings}
+            run={run}
+            assignments={assignments}
+          />
+        </>
       )}
     </ScreenShell>
+  )
+}
+
+/** Summary card for the selected paper: the uploaded details, up front. */
+function PaperSummary({ paper, used, limit }: { paper: Paper; used: number; limit: number }) {
+  return (
+    <section className="entity-card">
+      <div className="entity-card__head">
+        <strong className="entity-card__title">{paper.title || paper.id}</strong>
+        <span className={`badge${used < limit ? ' badge--warn' : ''}`} title="Assigned reviewers vs capacity">
+          {used}/{limit} reviewers
+        </span>
+      </div>
+      <div className="entity-card__meta">
+        <span className="muted">{paper.id}</span>
+        {paper.method && <span> · {paper.method}</span>}
+        {paper.keywords && <span className="entity-card__tags"> · {paper.keywords}</span>}
+      </div>
+      {paper.abstract && <p className="entity-card__text">{paper.abstract}</p>}
+      {paper.authors && <div className="entity-card__foot muted">Authors: {paper.authors}</div>}
+    </section>
+  )
+}
+
+/** Summary card for the selected reviewer: the uploaded details, up front. */
+function ReviewerSummary({
+  reviewer,
+  load,
+}: {
+  reviewer: Reviewer
+  load: { used: number; limit: number; over: boolean }
+}) {
+  return (
+    <section className="entity-card">
+      <div className="entity-card__head">
+        <strong className="entity-card__title">{reviewer.name}</strong>
+        <span className={`badge${load.over ? ' badge--warn' : ''}`} title="Assigned papers vs load limit">
+          {load.used}/{load.limit} papers
+        </span>
+      </div>
+      <div className="entity-card__meta">
+        <span className="entity-card__cap">{reviewer.role}</span>
+        {reviewer.institution && <span> · {reviewer.institution}</span>}
+        <span className="muted"> · {reviewer.id}</span>
+      </div>
+      {reviewer.criteria && <p className="entity-card__text">{reviewer.criteria}</p>}
+    </section>
+  )
+}
+
+/** Wraps a table cell's content with a hover card. */
+function HoverCell({ body, children }: { body: React.ReactNode; children: React.ReactNode }) {
+  const { pop, showPop, hidePop } = useHoverPopover(300)
+  return (
+    <span className="hover-target" onMouseEnter={showPop} onMouseLeave={hidePop}>
+      {children}
+      {pop && <HoverCardPortal pop={pop}>{body}</HoverCardPortal>}
+    </span>
   )
 }
 
@@ -172,10 +253,28 @@ function PaperDetail({ paperId, reviewerMap, paperMap, settings, run, assignment
       <tbody>
         {prefs.map((e) => {
           const ex = explainPair(run, assignments, reviewerMap, paperMap, settings, paperId, e.targetId)
+          const rev = reviewerMap.get(e.targetId)
           return (
             <tr key={e.targetId} className={ex.status === 'chosen' ? 'pref-row--chosen' : undefined}>
               <td>{e.rank}</td>
-              <td>{reviewerMap.get(e.targetId)?.name ?? e.targetId}</td>
+              <td>
+                {rev ? (
+                  <HoverCell
+                    body={
+                      <ReviewerHoverBody
+                        reviewer={rev}
+                        score={e.score}
+                        rank={e.rank}
+                        load={reviewerLoadStatus(assignments, rev, settings)}
+                      />
+                    }
+                  >
+                    {rev.name}
+                  </HoverCell>
+                ) : (
+                  e.targetId
+                )}
+              </td>
               <td>{e.score.toFixed(3)}</td>
               <td>{rankLabel(reviewerRankOf(run, e.targetId, paperId))}</td>
               <td>
@@ -206,10 +305,19 @@ function ReviewerDetail({ reviewerId, reviewerMap, paperMap, settings, run, assi
         {prefs.map((e) => {
           const ex = explainPair(run, assignments, reviewerMap, paperMap, settings, e.targetId, reviewerId)
           const paperRank = run.paperPreferences[e.targetId]?.find((x) => x.targetId === reviewerId)?.rank ?? 0
+          const pap = paperMap.get(e.targetId)
           return (
             <tr key={e.targetId} className={ex.status === 'chosen' ? 'pref-row--chosen' : undefined}>
               <td>{e.rank}</td>
-              <td>{paperMap.get(e.targetId)?.title?.slice(0, 40) || e.targetId}</td>
+              <td>
+                {pap ? (
+                  <HoverCell body={<PaperHoverBody paper={pap} />}>
+                    {pap.title?.slice(0, 40) || pap.id}
+                  </HoverCell>
+                ) : (
+                  e.targetId
+                )}
+              </td>
               <td>{e.score.toFixed(3)}</td>
               <td>{rankLabel(paperRank)}</td>
               <td>
