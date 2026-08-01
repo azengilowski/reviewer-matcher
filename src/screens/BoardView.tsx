@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   DndContext,
@@ -22,8 +22,10 @@ import {
   reviewerLoadStatus,
 } from '../editing/validation'
 import type { Assignment, MatchRun, Paper, Reviewer } from '../domain/types'
+import { fmtScore } from '../domain/format'
 import { HoverCardPortal, PaperHoverBody, ReviewerHoverBody, useHoverPopover } from './HoverCard'
 import { useApp } from '../state/AppStore'
+import { Toast, useToast } from './Toast'
 
 const UNASSIGNED = 'unassigned'
 
@@ -121,14 +123,7 @@ export function BoardView({ run }: { run: MatchRun }) {
   const [activeWidth, setActiveWidth] = useState<number | undefined>(undefined)
 
   // Transient toast explaining why a drop was rejected.
-  const [toast, setToast] = useState<string | null>(null)
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  function showToast(message: string) {
-    setToast(message)
-    clearTimeout(toastTimer.current)
-    toastTimer.current = setTimeout(() => setToast(null), 3500)
-  }
-  useEffect(() => () => clearTimeout(toastTimer.current), [])
+  const { toast, showToast } = useToast(3500)
 
   function onDragStart(event: DragStartEvent) {
     const { reviewerId } = parseDrag(String(event.active.id))
@@ -191,7 +186,7 @@ export function BoardView({ run }: { run: MatchRun }) {
     const result = computeMove(assignments, run, name, sourcePaperId, reviewerId, targetPaperId)
     if (result === 'conflict') {
       showToast(
-        `${name} can't be added to paper ${targetPaperId}: they're an author of it (self-authorship conflict).`,
+        `${name} can't be added to paper ${targetPaperId}: conflict of interest (authorship or institution).`,
       )
       return
     }
@@ -340,9 +335,9 @@ export function BoardView({ run }: { run: MatchRun }) {
                   {score != null && (
                     <span
                       className={`col__score col__score--${scoreTier(score)}`}
-                      title={`Average match score of the ${assigned.length} assigned reviewer(s): ${score.toFixed(2)} on a 0–1 scale (higher is a stronger topical match)`}
+                      title={`Average match score of the ${assigned.length} assigned reviewer(s): ${fmtScore(score)} on a 0–1 scale (higher is a stronger topical match)`}
                     >
-                      {score.toFixed(2)}
+                      {fmtScore(score)}
                     </span>
                   )}
                 </span>
@@ -466,11 +461,7 @@ export function BoardView({ run }: { run: MatchRun }) {
         />
       )}
 
-      {toast && (
-        <div className="toast" role="status" aria-live="polite">
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
     </DndContext>
   )
 }
@@ -545,7 +536,7 @@ function AddReviewersModal({
                 />
                 <span className="pick__rank">#{e.rank}</span>
                 <span className="pick__name">{nameById.get(e.targetId) ?? e.targetId}</span>
-                <span className="pick__score">{e.score.toFixed(3)}</span>
+                <span className="pick__score">{fmtScore(e.score, 3)}</span>
                 {isAssigned && <span className="pick__tag">on paper</span>}
                 {e.conflict && <span className="pick__tag pick__tag--warn">conflict</span>}
               </label>
@@ -665,7 +656,14 @@ function Column({
 function PaperTitle({ paper }: { paper: Paper }) {
   const { pop, showPop, hidePop } = useHoverPopover(320)
   return (
-    <div className="col__title" onMouseEnter={showPop} onMouseLeave={hidePop}>
+    <div
+      className="col__title"
+      tabIndex={0}
+      onMouseEnter={showPop}
+      onMouseLeave={hidePop}
+      onFocus={showPop}
+      onBlur={hidePop}
+    >
       {paper.title}
       {pop && (
         <HoverCardPortal pop={pop}>
@@ -713,7 +711,7 @@ function Card({
     : null
   const title = [
     score != null
-      ? `${name}: match score ${score.toFixed(3)}${rank ? `, this paper's #${rank} choice` : ''}`
+      ? `${name}: match score ${fmtScore(score, 3)}${rank ? `, this paper's #${rank} choice` : ''}`
       : name,
     loadText,
   ]
@@ -733,6 +731,8 @@ function Card({
       aria-label={title}
       onMouseEnter={showPop}
       onMouseLeave={hidePop}
+      onFocus={showPop}
+      onBlur={hidePop}
       className={`card${isDragging ? ' card--dragging' : ''}${manual ? ' card--manual' : ''}${locked ? ' card--locked' : ''}${highlight ? ' card--match' : ''}${over ? ' card--over' : ''}`}
       {...listeners}
       {...attributes}

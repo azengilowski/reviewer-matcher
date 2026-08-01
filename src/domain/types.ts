@@ -33,6 +33,10 @@ export interface MatchSettings {
   loadsByRole: Record<string, number>
   /** Load used for a role not present in loadsByRole. */
   defaultLoad: number
+  /** Exclude reviewers whose institution appears in a paper's Authors text. */
+  excludeSameInstitution?: boolean
+  /** Average-similarity floor under which a paper counts as a weak match. */
+  weakThreshold?: number
   /** Which side proposes — determines who is advantaged (SPEC §4.2–4.3). */
   proposingSide: 'papers' | 'reviewers'
   /** Reproducibility seed (SPEC §8). */

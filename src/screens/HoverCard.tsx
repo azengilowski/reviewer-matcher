@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Paper, Reviewer } from '../domain/types'
+import { fmtScore } from '../domain/format'
 
 export type PopPos = { left: number; top: number; above: boolean }
 
@@ -11,7 +12,7 @@ export type PopPos = { left: number; top: number; above: boolean }
  */
 export function useHoverPopover(width = 280) {
   const [pop, setPop] = useState<PopPos | null>(null)
-  const showPop = (e: React.MouseEvent) => {
+  const showPop = (e: { currentTarget: Element }) => {
     const r = e.currentTarget.getBoundingClientRect()
     const above = window.innerHeight - r.bottom < 240
     setPop({
@@ -62,7 +63,7 @@ export function ReviewerHoverBody({
         <div className="hover-card__stats">
           {score != null && (
             <span className="hover-card__stat">
-              match <strong>{score.toFixed(2)}</strong>
+              match <strong>{fmtScore(score)}</strong>
               {rank ? ` · #${rank} here` : ''}
             </span>
           )}

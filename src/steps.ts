@@ -10,7 +10,7 @@ export const STEPS: Step[] = [
   { to: '/upload', label: 'Upload' },
   { to: '/settings', label: 'Configure' },
   { to: '/match', label: 'Match' },
-  { to: '/dashboard', label: 'Review', match: ['/dashboard', '/details'] },
+  { to: '/dashboard', label: 'Review', match: ['/dashboard', '/workload', '/details'] },
   { to: '/export', label: 'Export' },
 ]
 

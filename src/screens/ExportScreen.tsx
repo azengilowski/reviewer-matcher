@@ -5,12 +5,16 @@ import { serializeProject } from '../io/project'
 import { useApp } from '../state/AppStore'
 import { EmptyState } from './EmptyState'
 import { ScreenShell } from './ScreenShell'
+import { Toast, useToast } from './Toast'
 
 export function ExportScreen() {
   const { reviewers, papers, settings, run, assignments, lockedPapers, auditLog, runHistory } =
     useApp()
   const hasData = reviewers.length > 0 || papers.length > 0
   const hasRun = run != null
+  const { toast, showToast } = useToast()
+  const manual = assignments.filter((a) => a.source === 'manual').length
+  const stale = run != null && JSON.stringify(run.settings) !== JSON.stringify(settings)
 
   function exportProject() {
     const json = serializeProject({
@@ -24,9 +28,11 @@ export function ExportScreen() {
       runHistory,
     })
     downloadText('peerfect-match.matchproj', json, 'application/json')
+    showToast('✓ Downloaded peerfect-match.matchproj')
   }
   function exportResults() {
     downloadText('reviewer-assignments.csv', exportResultsCsv(assignments, papers, reviewers))
+    showToast('✓ Downloaded reviewer-assignments.csv')
   }
   function exportReport() {
     if (run) {
@@ -34,6 +40,7 @@ export function ExportScreen() {
         'reviewer-match-report.csv',
         exportReportCsv(run, assignments, reviewers, papers, settings),
       )
+      showToast('✓ Downloaded reviewer-match-report.csv')
     }
   }
 
@@ -52,6 +59,19 @@ export function ExportScreen() {
       )}
       {hasData && !hasRun && (
         <p className="muted">Run a match first to export results and reports.</p>
+      )}
+      {hasData && hasRun && (
+        <p className="export-summary muted">
+          Exporting {assignments.length} assignments across {papers.length} papers and{' '}
+          {reviewers.length} reviewers
+          {manual > 0 && <> · {manual} manual edit{manual === 1 ? '' : 's'}</>}.
+        </p>
+      )}
+      {stale && (
+        <p className="export-stale">
+          ⚠️ Settings changed since this match was run — the exports reflect the last run, not the
+          current settings. Re-run on the Match step if you want them applied.
+        </p>
       )}
 
       {hasData && (
@@ -79,6 +99,7 @@ export function ExportScreen() {
         />
       </div>
       )}
+      <Toast message={toast} />
     </ScreenShell>
   )
 }

@@ -242,8 +242,13 @@ export function AppStoreProvider({ children, runner = workerRunner }: ProviderPr
   const hydrated = useRef(false)
   useEffect(() => {
     let cancelled = false
-    idbGet<ProjectFile>(PERSIST_KEY).then((saved) => {
-      if (!cancelled && saved && saved.app === 'reviewer-matcher') loadProject(saved)
+    idbGet<ProjectFile & { sampleLoaded?: boolean }>(PERSIST_KEY).then((saved) => {
+      if (!cancelled && saved && saved.app === 'reviewer-matcher') {
+        loadProject(saved)
+        // loadProject resets the flag (imports are real data); restore it for
+        // our own persisted state so the sample-data protections survive reload.
+        setSampleLoaded(!!saved.sampleLoaded)
+      }
       hydrated.current = true
     })
     return () => {
@@ -264,8 +269,9 @@ export function AppStoreProvider({ children, runner = workerRunner }: ProviderPr
       lockedPapers,
       auditLog,
       runHistory,
+      sampleLoaded,
     })
-  }, [reviewers, papers, settings, run, assignments, lockedPapers, auditLog, runHistory])
+  }, [reviewers, papers, settings, run, assignments, lockedPapers, auditLog, runHistory, sampleLoaded])
 
   const value = useMemo(
     () => ({

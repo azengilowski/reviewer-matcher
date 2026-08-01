@@ -6,11 +6,13 @@ import { HowItWorksModal } from './screens/HowItWorks'
 import { Wordmark } from './screens/Logo'
 import { Stepper } from './screens/Stepper'
 import { StepFooter } from './screens/StepFooter'
+import { UpdatePrompt } from './screens/UpdatePrompt'
 import { UploadScreen } from './screens/UploadScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { MatchScreen } from './screens/MatchScreen'
 import { DetailScreen } from './screens/DetailScreen'
 import { DashboardScreen } from './screens/DashboardScreen'
+import { WorkloadScreen } from './screens/WorkloadScreen'
 import { ExportScreen } from './screens/ExportScreen'
 import { DebugEngineScreen } from './screens/DebugEngineScreen'
 
@@ -145,12 +147,14 @@ function AppShell() {
           <Route path="/match" element={<MatchScreen />} />
           <Route path="/details" element={<DetailScreen />} />
           <Route path="/dashboard" element={<DashboardScreen />} />
+          <Route path="/workload" element={<WorkloadScreen />} />
           <Route path="/export" element={<ExportScreen />} />
           <Route path="/debug/engine" element={<DebugEngineScreen />} />
           <Route path="*" element={<Navigate to="/upload" replace />} />
         </Routes>
       </main>
       <StepFooter />
+      <UpdatePrompt />
     </div>
   )
 }

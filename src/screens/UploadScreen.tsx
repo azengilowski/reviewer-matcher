@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   buildPapers,
   buildReviewers,
@@ -8,25 +8,21 @@ import {
 import { parseDelimited } from '../io/readTable'
 import type { Paper, Reviewer } from '../domain/types'
 import { useApp } from '../state/AppStore'
+import { AddEntityModal } from './AddEntityModal'
 import { WarningIcon } from './Icons'
 import { ImportWizard } from './ImportWizard'
 import { ProjectBar } from './ProjectBar'
 import { ScreenShell } from './ScreenShell'
+import { Toast, useToast } from './Toast'
 
 export function UploadScreen() {
   const { reviewers, papers, setReviewers, setPapers, sampleLoaded, setSampleLoaded } = useApp()
   const [warnings, setWarnings] = useState<string[]>([])
   const [loadingSample, setLoadingSample] = useState(false)
+  const [adding, setAdding] = useState<null | 'reviewer' | 'paper'>(null)
 
-  // Transient confirmation toast (sample loaded / sample cleared).
-  const [toast, setToast] = useState<string | null>(null)
-  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  function showToast(message: string) {
-    setToast(message)
-    clearTimeout(toastTimer.current)
-    toastTimer.current = setTimeout(() => setToast(null), 4000)
-  }
-  useEffect(() => () => clearTimeout(toastTimer.current), [])
+  // Transient confirmation toast (sample loaded / sample cleared / replaced).
+  const { toast, showToast } = useToast(4000)
 
   async function loadSample() {
     setLoadingSample(true)
@@ -54,22 +50,39 @@ export function UploadScreen() {
   /** Importing your own file right after the sample clears the sample from the
    *  other side, so real and sample data never mix in a match. */
   function importReviewers(rows: Reviewer[], w: string[]) {
+    const replaced = reviewers.length
     setReviewers(rows)
     setWarnings(w)
     if (sampleLoaded) {
       setPapers([])
       setSampleLoaded(false)
       showToast(`✓ Imported ${rows.length} reviewers and cleared the sample papers.`)
+    } else if (replaced > 0) {
+      showToast(`✓ Imported ${rows.length} reviewers, replacing the previous ${replaced} (any match was cleared).`)
     }
   }
   function importPapers(rows: Paper[], w: string[]) {
+    const replaced = papers.length
     setPapers(rows)
     setWarnings(w)
     if (sampleLoaded) {
       setReviewers([])
       setSampleLoaded(false)
       showToast(`✓ Imported ${rows.length} papers and cleared the sample reviewers.`)
+    } else if (replaced > 0) {
+      showToast(`✓ Imported ${rows.length} papers, replacing the previous ${replaced} (any match was cleared).`)
     }
+  }
+
+  function addReviewer(r: Reviewer) {
+    setReviewers([...reviewers, r])
+    setAdding(null)
+    showToast(`✓ Added reviewer ${r.name}.`)
+  }
+  function addPaper(p: Paper) {
+    setPapers([...papers, p])
+    setAdding(null)
+    showToast(`✓ Added paper ${p.id}.`)
   }
 
   return (
@@ -92,6 +105,9 @@ export function UploadScreen() {
           >
             {reviewers.length > 0 ? '✓ ' : ''}
             {reviewers.length} loaded
+            <button className="upload-card__add" onClick={() => setAdding('reviewer')}>
+              + Add one manually
+            </button>
           </p>
           {reviewers.length > 0 && (
             <details className="upload-preview">
@@ -123,6 +139,9 @@ export function UploadScreen() {
           >
             {papers.length > 0 ? '✓ ' : ''}
             {papers.length} loaded
+            <button className="upload-card__add" onClick={() => setAdding('paper')}>
+              + Add one manually
+            </button>
           </p>
           {papers.length > 0 && (
             <details className="upload-preview">
@@ -174,11 +193,30 @@ export function UploadScreen() {
         </details>
       )}
 
-      {toast && (
-        <div className="toast" role="status" aria-live="polite">
-          {toast}
-        </div>
+      {adding === 'reviewer' && (
+        <AddEntityModal<Reviewer>
+          noun="reviewer"
+          fields={REVIEWER_FIELDS}
+          existingIds={reviewers.map((r) => r.id)}
+          idPrefix="R"
+          build={buildReviewers}
+          onAdd={addReviewer}
+          onClose={() => setAdding(null)}
+        />
       )}
+      {adding === 'paper' && (
+        <AddEntityModal<Paper>
+          noun="paper"
+          fields={PAPER_FIELDS}
+          existingIds={papers.map((p) => p.id)}
+          idPrefix="P"
+          build={buildPapers}
+          onAdd={addPaper}
+          onClose={() => setAdding(null)}
+        />
+      )}
+
+      <Toast message={toast} />
     </ScreenShell>
   )
 }

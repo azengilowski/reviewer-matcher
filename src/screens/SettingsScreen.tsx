@@ -15,6 +15,12 @@ const BOOST_OPTIONS: { value: number; label: string; title: string }[] = [
   { value: 0.3, label: 'High', title: 'Methodology fit weighs heavily' },
 ]
 
+const WEAK_OPTIONS: { value: number; label: string; title: string }[] = [
+  { value: 0.3, label: 'Lenient', title: 'Only the lowest matches (avg. similarity < 0.30) are flagged' },
+  { value: 0.4, label: 'Default', title: 'Papers with average similarity below 0.40 are flagged' },
+  { value: 0.5, label: 'Strict', title: 'Anything below a solid match (avg. similarity < 0.50) is flagged' },
+]
+
 export function SettingsScreen() {
   const { reviewers, papers, settings, setSettings, setSettingsInvalid } = useApp()
   const feasibility = computeFeasibility(reviewers, papers, settings)
@@ -22,6 +28,10 @@ export function SettingsScreen() {
   // Highlight the option nearest the stored value (handles legacy slider values).
   const activeBoost = BOOST_OPTIONS.reduce((best, o) =>
     Math.abs(o.value - settings.methodBoost) < Math.abs(best.value - settings.methodBoost) ? o : best,
+  )
+  const weakValue = settings.weakThreshold ?? 0.4
+  const activeWeak = WEAK_OPTIONS.reduce((best, o) =>
+    Math.abs(o.value - weakValue) < Math.abs(best.value - weakValue) ? o : best,
   )
 
   // Fields currently holding an empty/invalid draft. The store only ever sees
@@ -187,6 +197,42 @@ export function SettingsScreen() {
           />
           <span>Exclude reviewers from papers they authored</span>
         </label>
+        <label className="settings-check">
+          <input
+            type="checkbox"
+            checked={!!settings.excludeSameInstitution}
+            onChange={(e) => update({ excludeSameInstitution: e.target.checked })}
+          />
+          <span>Exclude reviewers from their own institution's papers</span>
+        </label>
+        <p className="muted settings-hint">
+          Matches each reviewer's institution against the paper's authors text. Only as reliable as
+          the affiliations in your data — leave off if authors don't include institutions.
+        </p>
+        <div className="settings-field">
+          <span>Weak-match sensitivity</span>
+          <div className="seg" role="group" aria-label="Weak-match sensitivity">
+            {WEAK_OPTIONS.map((o) => {
+              const on = o.value === activeWeak.value
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  className={on ? 'seg__btn seg__btn--on' : 'seg__btn'}
+                  aria-pressed={on}
+                  onClick={() => update({ weakThreshold: o.value })}
+                  title={o.title}
+                >
+                  {o.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+        <p className="muted settings-hint">
+          How readily the Review page flags a paper as a weak match, based on its reviewers' average
+          similarity. Doesn't affect matching — only which papers are surfaced for a second look.
+        </p>
         <label className="settings-field">
           <span>Random seed (for reproducible runs)</span>
           <input

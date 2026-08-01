@@ -109,9 +109,10 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
               The match is a starting point, not the final word. On the Match board you can drag a
               reviewer from one paper to another, add or remove people, and search or sort to find
               exactly what you need. Happy with a paper? Lock it, and it stays put even if you re-run
-              the match. Changed your mind? Every edit can be undone. Curious about the reasoning? The
-              Review tab shows each paper's full ranked list and explains why each reviewer did or
-              didn't make the cut.
+              the match. Changed your mind? Every edit can be undone. Prefer the keyboard? Tab to a
+              reviewer chip, press Space to pick it up, move with the arrow keys, and Space again to
+              drop. Curious about the reasoning? The Review tab shows each paper's full ranked list
+              and explains why each reviewer did or didn't make the cut.
             </p>
             <figure className="prose__figure">
               <TuneDiagram />

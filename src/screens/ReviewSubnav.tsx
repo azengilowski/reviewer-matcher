@@ -12,6 +12,11 @@ export function ReviewSubnav() {
           Overview
         </span>
       </NavLink>
+      <NavLink to="/workload" className={cls}>
+        <span className="review-subtab__label" data-label="Workload">
+          Workload
+        </span>
+      </NavLink>
       <NavLink to="/details" className={cls}>
         <span className="review-subtab__label" data-label="Details">
           Details

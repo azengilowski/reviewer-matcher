@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { computeDashboard, type Bar, type Pairing } from '../analytics/stats'
 import { capacityForPaper } from '../domain/settings'
+import { fmtScore } from '../domain/format'
 import type { Paper, Reviewer } from '../domain/types'
 import {
   averagePaperScore,
@@ -13,11 +14,10 @@ import { EmptyState } from './EmptyState'
 import { ReviewSubnav } from './ReviewSubnav'
 import { ScreenShell } from './ScreenShell'
 
-/** A weak-match threshold: papers whose average similarity is below this need a look. */
-const WEAK_SCORE = 0.4
-
 export function DashboardScreen() {
   const { reviewers, papers, settings, run, assignments, runHistory } = useApp()
+  // Papers whose average similarity falls below this need a look (configurable).
+  const weakScore = settings.weakThreshold ?? 0.4
 
   const stats = useMemo(
     () => (run ? computeDashboard(reviewers, papers, settings, run, assignments) : null),
@@ -35,13 +35,14 @@ export function DashboardScreen() {
     return {
       unfilled: paperInfo.filter((x) => x.used < x.cap),
       overCap: paperInfo.filter((x) => x.used > x.cap),
-      weak: paperInfo.filter((x) => x.used > 0 && x.score != null && x.score < WEAK_SCORE),
+      weak: paperInfo.filter((x) => x.used > 0 && x.score != null && x.score < weakScore),
       overloaded: reviewers
         .map((r) => ({ r, s: reviewerLoadStatus(assignments, r, settings) }))
         .filter((x) => x.s.over),
       idle: reviewers.filter((r) => papersForReviewer(assignments, r.id).length === 0),
+      weakScore,
     }
-  }, [run, papers, reviewers, assignments, settings])
+  }, [run, papers, reviewers, assignments, settings, weakScore])
   const autoStats = useMemo(
     () => (run ? computeDashboard(reviewers, papers, settings, run, run.assignments) : null),
     [reviewers, papers, settings, run],
@@ -166,6 +167,7 @@ type Attn = {
   weak: PaperInfo[]
   overloaded: { r: Reviewer; s: { used: number; limit: number; over: boolean } }[]
   idle: Reviewer[]
+  weakScore: number
 }
 
 const paperLink = (id: string) => `/details?mode=paper&id=${encodeURIComponent(id)}`
@@ -214,12 +216,12 @@ function NeedsAttention({ a }: { a: Attn }) {
           <AttentionGroup
             tone="warn"
             title="Weak matches"
-            hint={`average similarity below ${WEAK_SCORE.toFixed(2)}`}
+            hint={`average similarity below ${a.weakScore.toFixed(2)}`}
             items={a.weak.map((x) => ({
               id: x.p.id,
               label: x.p.id,
-              sub: x.score!.toFixed(2),
-              title: `${x.p.title || x.p.id} — average similarity ${x.score!.toFixed(2)}`,
+              sub: fmtScore(x.score!),
+              title: `${x.p.title || x.p.id} — average similarity ${fmtScore(x.score!)}`,
               to: paperLink(x.p.id),
             }))}
           />
@@ -355,7 +357,7 @@ function PairList({ pairs, nameById }: { pairs: Pairing[]; nameById: Map<string,
           <span>
             {p.paperId} ↔ {nameById.get(p.reviewerId) ?? p.reviewerId}
           </span>
-          <span className="pairlist__score">{p.score.toFixed(3)}</span>
+          <span className="pairlist__score">{fmtScore(p.score, 3)}</span>
         </li>
       ))}
     </ul>

@@ -12,7 +12,10 @@ export default defineConfig({
     // works offline after the first visit (SPEC §8–9). The embedding model is
     // additionally cached at runtime from its CDN.
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt' (not autoUpdate): a new build is fetched but not swapped in
+      // until the user accepts, so a pinned/open session isn't silently
+      // reloaded mid-edit. UpdatePrompt surfaces the "refresh" toast.
+      registerType: 'prompt',
       includeAssets: ['icon.svg'],
       manifest: {
         name: 'Peerfect Match',

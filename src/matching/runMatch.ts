@@ -37,6 +37,18 @@ export function methodMatches(paper: Paper, reviewer: Reviewer): boolean {
     .some((t) => crit.includes(t))
 }
 
+/**
+ * True if the reviewer's institution appears in the paper's Authors text.
+ * A heuristic by necessity: papers carry affiliations only inside the free-text
+ * authors column, so this is a case-insensitive substring match (short strings
+ * are ignored to avoid false hits on initials).
+ */
+export function isInstitutionConflict(reviewer: Reviewer, paper: Paper): boolean {
+  const inst = (reviewer.institution ?? '').trim().toLowerCase()
+  if (inst.length < 4) return false
+  return paper.authors.toLowerCase().includes(inst)
+}
+
 /** True if the reviewer's name appears among the paper's authors (self-authorship). */
 export function isSelfAuthor(reviewer: Reviewer, paper: Paper): boolean {
   const name = reviewer.name.trim().toLowerCase()
@@ -95,9 +107,10 @@ export async function runMatch(
     return methodBoost > 0 && methodMatches(paper, reviewer) ? base + methodBoost : base
   }
 
-  // 2. Conflict predicate (self-authorship), reused for both directions.
+  // 2. Conflict predicate (self-authorship / same institution), both directions.
   const conflict = (paper: Paper, reviewer: Reviewer) =>
-    settings.excludeSelfAuthorship && isSelfAuthor(reviewer, paper)
+    (settings.excludeSelfAuthorship && isSelfAuthor(reviewer, paper)) ||
+    (!!settings.excludeSameInstitution && isInstitutionConflict(reviewer, paper))
 
   // 3. Rank reviewers for each paper, and papers for each reviewer.
   const paperPreferences: Record<string, PreferenceEntry[]> = {}

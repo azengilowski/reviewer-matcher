@@ -7,6 +7,7 @@ import {
   reviewerRankOf,
 } from '../editing/validation'
 import type { Paper, Reviewer } from '../domain/types'
+import { fmtScore } from '../domain/format'
 import { useApp } from '../state/AppStore'
 import { EmptyState } from './EmptyState'
 import { HoverCardPortal, PaperHoverBody, ReviewerHoverBody, useHoverPopover } from './HoverCard'
@@ -60,10 +61,12 @@ export function DetailScreen() {
 
   const allOptions = mode === 'paper' ? papers : reviewers
   const currentId = selectedId || allOptions[0]?.id || ''
-  const labelFor = (id: string) =>
-    mode === 'paper'
-      ? `${id}: ${(paperMap.get(id)?.title ?? '').slice(0, 50)}`
-      : reviewerMap.get(id)?.name ?? id
+  const labelFor = (id: string) => {
+    if (mode !== 'paper') return reviewerMap.get(id)?.name ?? id
+    const title = paperMap.get(id)?.title ?? ''
+    // Keep the option short; the summary card below shows the full details.
+    return `${id}: ${title.length > 40 ? `${title.slice(0, 40)}…` : title}`
+  }
   const pq = pickerQuery.trim().toLowerCase()
   const matches = (id: string) => {
     if (!pq) return true
@@ -222,7 +225,14 @@ function ReviewerSummary({
 function HoverCell({ body, children }: { body: React.ReactNode; children: React.ReactNode }) {
   const { pop, showPop, hidePop } = useHoverPopover(300)
   return (
-    <span className="hover-target" onMouseEnter={showPop} onMouseLeave={hidePop}>
+    <span
+      className="hover-target"
+      tabIndex={0}
+      onMouseEnter={showPop}
+      onMouseLeave={hidePop}
+      onFocus={showPop}
+      onBlur={hidePop}
+    >
       {children}
       {pop && <HoverCardPortal pop={pop}>{body}</HoverCardPortal>}
     </span>
@@ -275,7 +285,7 @@ function PaperDetail({ paperId, reviewerMap, paperMap, settings, run, assignment
                   e.targetId
                 )}
               </td>
-              <td>{e.score.toFixed(3)}</td>
+              <td>{fmtScore(e.score, 3)}</td>
               <td>{rankLabel(reviewerRankOf(run, e.targetId, paperId))}</td>
               <td>
                 <span className={STATUS_CLASS[ex.status]}>{ex.label}</span>
@@ -318,7 +328,7 @@ function ReviewerDetail({ reviewerId, reviewerMap, paperMap, settings, run, assi
                   e.targetId
                 )}
               </td>
-              <td>{e.score.toFixed(3)}</td>
+              <td>{fmtScore(e.score, 3)}</td>
               <td>{rankLabel(paperRank)}</td>
               <td>
                 <span className={STATUS_CLASS[ex.status]}>{ex.label}</span>

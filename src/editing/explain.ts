@@ -43,7 +43,7 @@ export function explainPair(
   if (chosen) return { status: 'chosen', label: 'Chosen' }
 
   const entry = run.paperPreferences[paperId]?.find((e) => e.targetId === reviewerId)
-  if (entry?.conflict) return { status: 'conflict', label: 'Excluded: self-authorship conflict' }
+  if (entry?.conflict) return { status: 'conflict', label: 'Excluded: conflict of interest' }
 
   const reviewer = reviewers.get(reviewerId)
   if (reviewer) {

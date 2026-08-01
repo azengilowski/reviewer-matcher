@@ -321,6 +321,13 @@ body {
   color: var(--border);
   font-size: 1rem;
 }
+/* Narrow windows: inactive steps collapse to their number markers so all five
+   steps always fit — no invisible horizontal scrolling. */
+@media (max-width: 940px) {
+  .step:not(.step--active) .step__label {
+    display: none;
+  }
+}
 
 /* "Next: X →" bottom bar — pinned below the scrollable main, same height as the header */
 .step-footer {
@@ -345,12 +352,27 @@ body {
   color: var(--muted);
 }
 
-/* Export step cards */
+/* What the exports will contain, shown above the cards. */
+.export-summary {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+}
+.export-stale {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #b8860b;
+}
+
+/* Export step cards. Flex (not grid) so a card wrapped onto its own row
+   stretches to fill it instead of sitting as a half-width orphan. */
 .export-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-top: 0.5rem;
+}
+.export-grid > * {
+  flex: 1 1 260px;
 }
 .export-card {
   display: flex;
@@ -634,6 +656,69 @@ body {
 .upload-card__count--ok {
   color: #1a7f37;
   font-weight: 600;
+}
+.upload-card__add {
+  margin-left: 0.6rem;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+.upload-card__add:hover {
+  text-decoration: underline;
+}
+
+/* Add-reviewer / add-paper form modal. Stack label → input → hint (override
+   the horizontal .settings-field layout it borrows input styling from). */
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.add-form__field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  margin: 0;
+}
+.add-form__field > span:first-child {
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+}
+.add-form__hint {
+  text-align: left;
+}
+.add-form__field input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font: inherit;
+}
+.add-form__req {
+  color: #b42318;
+}
+.add-form__textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.add-form__hint {
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+.add-form__error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.85rem;
 }
 .upload-card__hint {
   font-size: 0.82rem;
@@ -1431,6 +1516,41 @@ details.warnings summary {
     transform: translate(-50%, 0);
   }
 }
+/* Service-worker update banner (bottom-right, distinct from the center toast). */
+.update-toast {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #26262c;
+  color: #fff;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--r-md);
+  font-size: 0.85rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 250;
+  max-width: min(90vw, 320px);
+  animation: toast-in 0.16s ease-out;
+}
+.update-toast__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.update-toast__dismiss {
+  border: none;
+  background: none;
+  color: #b8bcc8;
+  cursor: pointer;
+  font: inherit;
+}
+.update-toast__dismiss:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
 .col__head {
   display: flex;
   align-items: center;
@@ -2202,6 +2322,119 @@ details.warnings summary {
 
 /* Dashboard */
 /* "Needs attention": actionable outliers at the top of the review page. */
+/* Reviewer workload view (Review → Workload tab). */
+.workload-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.workload-toolbar .board-search {
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+.workload-toolbar__counts {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 0.82rem;
+}
+.workload-count {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2, #eef0f4);
+}
+.workload-count--over {
+  background: #fde8e8;
+  color: #b42318;
+}
+.workload-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.workload-row {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  padding: 0.7rem 0.85rem;
+}
+.workload-row--over {
+  border-color: #f1b0b0;
+  background: #fef7f7;
+}
+.workload-row--idle {
+  border-style: dashed;
+}
+.workload-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.workload-row__name {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.workload-row__name:hover {
+  text-decoration: underline;
+}
+.workload-row__role {
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+.workload-row__load {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.workload-row__load--over {
+  color: #b42318;
+}
+.workload-row__papers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+.workload-row__none {
+  font-size: 0.82rem;
+  font-style: italic;
+}
+.workload-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-weak);
+  color: var(--accent-strong);
+  text-decoration: none;
+  font-size: 0.82rem;
+}
+.workload-pill:hover {
+  background: #dbe6fd;
+}
+.workload-pill__id {
+  font-weight: 600;
+  flex: none;
+}
+.workload-pill__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 22ch;
+}
+.workload-pill__score {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
 .attention {
   margin-bottom: 1rem;
 }
@@ -2428,6 +2661,14 @@ details.warnings summary {
   gap: 0.6rem;
   flex-wrap: wrap;
   align-items: center;
+  padding: 0.4rem;
+  margin: -0.4rem;
+  border-radius: var(--r-md);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.projectbar--dragover {
+  background: var(--accent-weak);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 .projectbar__msg {
   width: 100%;

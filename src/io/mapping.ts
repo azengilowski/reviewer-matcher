@@ -54,7 +54,7 @@ export const REVIEWER_FIELDS: FieldSpec[] = [
     key: 'institution',
     label: 'Institution',
     aliases: ['institution', 'affiliation'],
-    hint: 'Optional, free text, shown for reference only. It is not used for matching or conflicts, so names, abbreviations, or sub-programs are all fine.',
+    hint: 'Optional, free text. Shown for reference, and — if you enable the same-institution conflict rule in Configure — matched against papers’ author affiliations, so consistent naming helps there.',
     example: 'Univ. of Michigan, School of Ed.',
   },
 ]

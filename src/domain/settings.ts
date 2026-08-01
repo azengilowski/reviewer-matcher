@@ -9,6 +9,8 @@ export const DEFAULT_SETTINGS: MatchSettings = {
   proposingSide: 'papers',
   seed: 'peerfect-match',
   excludeSelfAuthorship: true,
+  excludeSameInstitution: false,
+  weakThreshold: 0.4,
   methodBoost: 0,
   minLoad: 0,
   embeddingModel: DEFAULT_MODEL,

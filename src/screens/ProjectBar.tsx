@@ -8,6 +8,15 @@ export function ProjectBar() {
   const { reviewers, papers, run, loadProject, commitAssignments } = useApp()
   const [message, setMessage] = useState<{ kind: 'warn' | 'ok'; text: string } | null>(null)
   const [report, setReport] = useState<ResolutionReport | null>(null)
+  const [dragOver, setDragOver] = useState(false)
+
+  /** Route a dropped file by extension: .matchproj/.json → project, .csv → results. */
+  function onDropFile(file: File) {
+    const name = file.name.toLowerCase()
+    if (name.endsWith('.matchproj') || name.endsWith('.json')) void onProjectFile(file)
+    else if (name.endsWith('.csv')) void onResultsFile(file)
+    else setMessage({ kind: 'warn', text: `Can't import "${file.name}": drop a .matchproj or results .csv.` })
+  }
 
   async function onProjectFile(file: File) {
     const result = parseProject(await file.text())
@@ -38,7 +47,20 @@ export function ProjectBar() {
   }
 
   return (
-    <div className="projectbar">
+    <div
+      className={`projectbar${dragOver ? ' projectbar--dragover' : ''}`}
+      onDragOver={(e) => {
+        e.preventDefault()
+        setDragOver(true)
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault()
+        setDragOver(false)
+        const f = e.dataTransfer.files?.[0]
+        if (f) onDropFile(f)
+      }}
+    >
       <label htmlFor="proj-import" className="btn btn--file">
         Import project (.matchproj)
       </label>
