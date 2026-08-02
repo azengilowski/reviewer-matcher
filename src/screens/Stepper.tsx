@@ -38,6 +38,11 @@ export function Stepper() {
               <span className="step__label" data-label={s.label}>
                 {s.label}
               </span>
+              {active && (
+                <span className="stepper__progress" aria-hidden="true">
+                  {i + 1}/{STEPS.length}
+                </span>
+              )}
             </Link>
           </Fragment>
         )

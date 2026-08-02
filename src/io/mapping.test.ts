@@ -107,3 +107,30 @@ describe('messy real-world parsing', () => {
     expect(papers[0].title).toBe('Data and Learning')
   })
 })
+
+describe('duplicate ids', () => {
+  it('keeps the first reviewer with a repeated id and warns about the rest', () => {
+    const rows = [
+      ['R1', 'First Person', 'professor', 'topic a'],
+      ['R1', 'Second Person', 'student', 'topic b'],
+      ['r1', 'Third Person', 'student', 'topic c'], // case-insensitive dupe
+    ]
+    const mapping = { id: 0, name: 1, role: 2, criteria: 3, criteria2: -1, institution: -1 }
+    const { rows: reviewers, warnings } = buildReviewers(rows, mapping)
+    expect(reviewers).toHaveLength(1)
+    expect(reviewers[0].name).toBe('First Person')
+    expect(warnings.filter((w) => /duplicate reviewer id/i.test(w))).toHaveLength(2)
+  })
+
+  it('keeps the first paper with a repeated id and warns', () => {
+    const rows = [
+      ['P1', 'Title A', 'abs', 'kw', 'Qualitative', 'x'],
+      ['P1', 'Title B', 'abs', 'kw', 'Qualitative', 'x'],
+    ]
+    const mapping = { id: 0, title: 1, abstract: 2, keywords: 3, method: 4, authors: 5 }
+    const { rows: papers, warnings } = buildPapers(rows, mapping)
+    expect(papers).toHaveLength(1)
+    expect(papers[0].title).toBe('Title A')
+    expect(warnings.some((w) => /duplicate paper id/i.test(w))).toBe(true)
+  })
+})

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useModalKeys } from './useModal'
 import { LockIcon } from './Icons'
 import { Wordmark } from './Logo'
 
@@ -6,18 +7,15 @@ import { Wordmark } from './Logo'
  *  in plain language, with a small diagram for each idea. */
 export function HowItWorksModal({ onClose }: { onClose: () => void }) {
   const bodyRef = useRef<HTMLDivElement>(null)
+  const modalRef = useModalKeys(onClose)
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = 0 // always open at the top
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [])
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
+        ref={modalRef}
         className="modal modal--wide"
         role="dialog"
         aria-modal="true"

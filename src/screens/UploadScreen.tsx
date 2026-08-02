@@ -16,10 +16,11 @@ import { ScreenShell } from './ScreenShell'
 import { Toast, useToast } from './Toast'
 
 export function UploadScreen() {
-  const { reviewers, papers, setReviewers, setPapers, sampleLoaded, setSampleLoaded } = useApp()
+  const { reviewers, papers, run, assignments, setReviewers, setPapers, sampleLoaded, setSampleLoaded } = useApp()
   const [warnings, setWarnings] = useState<string[]>([])
   const [loadingSample, setLoadingSample] = useState(false)
   const [adding, setAdding] = useState<null | 'reviewer' | 'paper'>(null)
+  const [editing, setEditing] = useState<null | { kind: 'reviewer' | 'paper'; id: string }>(null)
 
   // Transient confirmation toast (sample loaded / sample cleared / replaced).
   const { toast, showToast } = useToast(4000)
@@ -74,15 +75,41 @@ export function UploadScreen() {
     }
   }
 
+  // Changing the data invalidates the run, so say so when one exists.
+  const runWarning = run
+    ? `You have a match with ${assignments.length} assignments. Changing the data clears it (export first if you want to keep it), and you'll need to re-run.`
+    : undefined
+
   function addReviewer(r: Reviewer) {
     setReviewers([...reviewers, r])
     setAdding(null)
-    showToast(`✓ Added reviewer ${r.name}.`)
+    showToast(`✓ Added reviewer ${r.name}.${run ? ' The match was cleared — re-run when ready.' : ''}`)
   }
   function addPaper(p: Paper) {
     setPapers([...papers, p])
     setAdding(null)
-    showToast(`✓ Added paper ${p.id}.`)
+    showToast(`✓ Added paper ${p.id}.${run ? ' The match was cleared — re-run when ready.' : ''}`)
+  }
+
+  const clearedNote = run ? ' The match was cleared — re-run when ready.' : ''
+  function saveReviewer(updated: Reviewer) {
+    setReviewers(reviewers.map((r) => (r.id === editing?.id ? updated : r)))
+    setEditing(null)
+    showToast(`✓ Updated reviewer ${updated.name}.${clearedNote}`)
+  }
+  function savePaper(updated: Paper) {
+    setPapers(papers.map((p) => (p.id === editing?.id ? updated : p)))
+    setEditing(null)
+    showToast(`✓ Updated paper ${updated.id}.${clearedNote}`)
+  }
+  function removeReviewer(id: string) {
+    const name = reviewers.find((r) => r.id === id)?.name ?? id
+    setReviewers(reviewers.filter((r) => r.id !== id))
+    showToast(`✓ Removed reviewer ${name}.${clearedNote}`)
+  }
+  function removePaper(id: string) {
+    setPapers(papers.filter((p) => p.id !== id))
+    showToast(`✓ Removed paper ${id}.${clearedNote}`)
   }
 
   return (
@@ -111,16 +138,31 @@ export function UploadScreen() {
           </p>
           {reviewers.length > 0 && (
             <details className="upload-preview">
-              <summary>Preview loaded reviewers</summary>
-              <ul>
-                {reviewers.slice(0, 6).map((r) => (
-                  <li key={r.id}>
-                    {r.name} <span className="muted">· {r.role}</span>
+              <summary>View &amp; edit loaded reviewers</summary>
+              <ul className="upload-preview__list">
+                {reviewers.map((r) => (
+                  <li key={r.id} className="upload-preview__row">
+                    <span className="upload-preview__label">
+                      {r.name} <span className="muted">· {r.role}</span>
+                    </span>
+                    <button
+                      className="upload-preview__act"
+                      title={`Edit ${r.name}`}
+                      aria-label={`Edit reviewer ${r.name}`}
+                      onClick={() => setEditing({ kind: 'reviewer', id: r.id })}
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="upload-preview__act upload-preview__act--danger"
+                      title={`Remove ${r.name}`}
+                      aria-label={`Remove reviewer ${r.name}`}
+                      onClick={() => removeReviewer(r.id)}
+                    >
+                      ×
+                    </button>
                   </li>
                 ))}
-                {reviewers.length > 6 && (
-                  <li className="muted">…and {reviewers.length - 6} more</li>
-                )}
               </ul>
             </details>
           )}
@@ -145,14 +187,31 @@ export function UploadScreen() {
           </p>
           {papers.length > 0 && (
             <details className="upload-preview">
-              <summary>Preview loaded papers</summary>
-              <ul>
-                {papers.slice(0, 6).map((p) => (
-                  <li key={p.id}>
-                    <span className="muted">{p.id}</span> {p.title}
+              <summary>View &amp; edit loaded papers</summary>
+              <ul className="upload-preview__list">
+                {papers.map((p) => (
+                  <li key={p.id} className="upload-preview__row">
+                    <span className="upload-preview__label">
+                      <span className="muted">{p.id}</span> {p.title}
+                    </span>
+                    <button
+                      className="upload-preview__act"
+                      title={`Edit ${p.id}`}
+                      aria-label={`Edit paper ${p.id}`}
+                      onClick={() => setEditing({ kind: 'paper', id: p.id })}
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="upload-preview__act upload-preview__act--danger"
+                      title={`Remove ${p.id}`}
+                      aria-label={`Remove paper ${p.id}`}
+                      onClick={() => removePaper(p.id)}
+                    >
+                      ×
+                    </button>
                   </li>
                 ))}
-                {papers.length > 6 && <li className="muted">…and {papers.length - 6} more</li>}
               </ul>
             </details>
           )}
@@ -202,8 +261,56 @@ export function UploadScreen() {
           build={buildReviewers}
           onAdd={addReviewer}
           onClose={() => setAdding(null)}
+          warning={runWarning}
         />
       )}
+      {editing?.kind === 'reviewer' && (() => {
+        const r = reviewers.find((x) => x.id === editing.id)
+        if (!r) return null
+        return (
+          <AddEntityModal<Reviewer>
+            noun="reviewer"
+            fields={REVIEWER_FIELDS}
+            existingIds={reviewers.map((x) => x.id)}
+            idPrefix="R"
+            build={buildReviewers}
+            onAdd={saveReviewer}
+            onClose={() => setEditing(null)}
+            warning={runWarning}
+            initial={{
+              id: r.id,
+              name: r.name,
+              role: r.role,
+              criteria: r.criteria,
+              institution: r.institution ?? '',
+            }}
+          />
+        )
+      })()}
+      {editing?.kind === 'paper' && (() => {
+        const pap = papers.find((x) => x.id === editing.id)
+        if (!pap) return null
+        return (
+          <AddEntityModal<Paper>
+            noun="paper"
+            fields={PAPER_FIELDS}
+            existingIds={papers.map((x) => x.id)}
+            idPrefix="P"
+            build={buildPapers}
+            onAdd={savePaper}
+            onClose={() => setEditing(null)}
+            warning={runWarning}
+            initial={{
+              id: pap.id,
+              title: pap.title,
+              abstract: pap.abstract,
+              keywords: pap.keywords,
+              method: pap.method,
+              authors: pap.authors,
+            }}
+          />
+        )
+      })()}
       {adding === 'paper' && (
         <AddEntityModal<Paper>
           noun="paper"
@@ -213,6 +320,7 @@ export function UploadScreen() {
           build={buildPapers}
           onAdd={addPaper}
           onClose={() => setAdding(null)}
+          warning={runWarning}
         />
       )}
 

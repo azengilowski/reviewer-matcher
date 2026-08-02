@@ -1,0 +1,431 @@
+:root {
+  --bg: #f7f7f8;
+  --surface: #ffffff;
+  --border: #e2e2e6;
+  --text: #1a1a1e;
+  --muted: #6b6b76;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-weak: #e8f0fe;
+  --bar-h: 3.5rem;
+  /* Radius scale: controls, cards, containers. */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.28);
+  --font-display: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Flat inline icons: sit on the text baseline, inherit the surrounding color. */
+.icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
+}
+.icon--warn {
+  color: #b8860b;
+}
+.prose h4 .icon--lock {
+  color: #1a7f37;
+  margin-right: 0.35rem;
+}
+
+/* Brand wordmark: display font, gradient ink (brand blue into pink),
+   with "Peer" set in script so the pun lands. */
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .wordmark {
+    background: linear-gradient(105deg, #2563eb 12%, #8b3ec8 52%, #dc2626 92%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+.wordmark em {
+  /* "Peer" in a curly script against the upright grotesk. Pacifico is already
+     slanted, so no synthetic italic; slight size/space tuning to sit well. */
+  font-family: 'Pacifico', cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 0.98em;
+  margin-right: 0.09em;
+}
+
+/* One keyboard-focus treatment everywhere. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Shared micro-interactions: everything clickable eases, nothing snaps. */
+.step,
+.tab,
+.review-subtab,
+.pick,
+.card,
+.col__lock,
+.col__add,
+.iconbtn,
+.select,
+.card__remove,
+.modal__close,
+.app__help {
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app__header {
+  height: var(--bar-h);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+/* Header content shares the same max-width + padding as the page and footer,
+   so the wordmark, page titles, and footer button all line up. */
+.app__header-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.app__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.55rem;
+  margin: 0;
+  flex-shrink: 0;
+}
+.logo {
+  display: block;
+}
+.app__homelink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Loaded-data counts, always visible next to the help button. */
+.app__counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: default;
+}
+.app__counts svg {
+  display: block;
+}
+.app__counts svg:not(:first-child) {
+  margin-left: 0.3rem;
+}
+
+/* Round icon button: reset the app. */
+.app__reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.app__reset:hover {
+  color: #c0392b;
+  border-color: #c0392b;
+  background: #fdeaea;
+}
+.app__reset svg {
+  display: block;
+}
+
+.app__help {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #fff;
+  background: #1a7f37;
+  border: 1px solid #1a7f37;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+}
+.app__help:hover {
+  background: #166a2e;
+  border-color: #166a2e;
+}
+.app__help svg {
+  display: block;
+}
+
+/* The counts and help label are niceties; give the stepper the room on
+   narrow windows. The help button collapses to an outlined circle matching
+   the reset button, with the icon in green. (Must come after the base
+   .app__help rules so these override them.) */
+@media (max-width: 1000px) {
+  .app__counts {
+    display: none;
+  }
+  .app__help-label {
+    display: none;
+  }
+  .app__help {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-color: var(--border);
+    color: #1a7f37;
+  }
+  .app__help:hover {
+    background: #e7f4ed;
+    border-color: #1a7f37;
+  }
+  .app__help svg {
+    /* flex-shrink 0 matters: flexbox can shrink a viewBox'd SVG to ~0. */
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.app__main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.1rem 1.5rem 1.5rem;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Progress stepper — lives inside the header, taking the middle space */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+}
+.step:hover {
+  background: var(--bg);
+}
+.step__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+}
+.step--done .step__marker {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.step--active .step__marker {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+/* Reserve the bold width up front so the active weight never reflows the row. */
+.step__label {
+  display: inline-flex;
+  flex-direction: column;
+}
+.step__label::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 600;
+}
+.step--active .step__label {
+  color: var(--text);
+  font-weight: 600;
+}
+.step__sep {
+  color: var(--border);
+  font-size: 1rem;
+}
+/* Narrow windows: inactive steps collapse to their number markers so all five
+   steps always fit — no invisible horizontal scrolling. */
+@media (max-width: 940px) {
+  .step:not(.step--active) .step__label {
+    display: none;
+  }
+}
+/* The "n/5" position indicator only appears at phone widths. */
+.stepper__progress {
+  display: none;
+}
+/* Phones: show only the current step + a compact "n/5", so the header fits
+   without the wordmark and stepper fighting for space. */
+@media (max-width: 560px) {
+  .step:not(.step--active),
+  .step__sep {
+    display: none;
+  }
+  .stepper__progress {
+    display: inline;
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .step--active .step__label {
+    display: inline; /* the current step always keeps its name */
+  }
+  .stepper {
+    overflow: visible;
+  }
+  .app__title {
+    font-size: 1.15rem; /* make room beside the wordmark */
+  }
+  .app__counts {
+    display: none; /* the data counts don't fit; Upload shows them anyway */
+  }
+  .app__help {
+    display: none; /* still reachable from the home hero */
+  }
+  .app__header-inner {
+    padding: 0 0.9rem;
+  }
+}
+
+/* "Next: X →" bottom bar — pinned below the scrollable main, same height as the header */
+.step-footer {
+  flex-shrink: 0;
+  height: var(--bar-h);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.step-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  height: 100%;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+.step-footer__label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* What the exports will contain, shown above the cards. */
+.export-summary {
+  margin: 0 0 0.35rem;
+  font-size: 0.88rem;
+}
+.export-stale {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #b8860b;
+}
+
+/* Export step cards. Flex (not grid) so a card wrapped onto its own row
+   stretches to fill it instead of sitting as a half-width orphan. */
+.export-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.export-grid > * {
+  flex: 1 1 260px;
+}
+.export-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+.export-card__desc {
+  margin: 0;
+  flex: 1;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.export-card .btn {
+  align-self: flex-start;
+}

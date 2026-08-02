@@ -1,0 +1,514 @@
+/* Upload */
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.upload-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 1rem;
+}
+.upload-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.upload-card__count {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.upload-card__count--ok {
+  color: #1a7f37;
+  font-weight: 600;
+}
+.upload-card__add {
+  margin-left: 0.6rem;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+.upload-card__add:hover {
+  text-decoration: underline;
+}
+
+/* Add-reviewer / add-paper form modal. Stack label → input → hint (override
+   the horizontal .settings-field layout it borrows input styling from). */
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.add-form__field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  margin: 0;
+}
+.add-form__field > span:first-child {
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+}
+.add-form__hint {
+  text-align: left;
+}
+.add-form__field input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font: inherit;
+}
+.add-form__req {
+  color: #b42318;
+}
+.add-form__textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.add-form__hint {
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+.add-form__error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+.add-form__warning {
+  margin: 0 0 0.85rem;
+  padding: 0.5rem 0.65rem;
+  background: #fff8e6;
+  border: 1px solid #f0d98c;
+  border-radius: var(--r-sm);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: left;
+}
+.upload-card__hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0.35rem 0 0.75rem;
+}
+.upload-preview {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+}
+.upload-preview summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+.upload-preview ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1rem;
+  color: var(--text);
+}
+.upload-preview li {
+  margin: 0.1rem 0;
+}
+/* Manageable list: every row, scrollable, with edit/remove actions. */
+.upload-preview__list {
+  list-style: none;
+  padding-left: 0 !important;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.upload-preview__row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.2rem;
+  border-radius: var(--r-sm);
+}
+.upload-preview__row:hover {
+  background: var(--accent-weak);
+}
+.upload-preview__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.upload-preview__act {
+  flex: none;
+  border: none;
+  background: none;
+  padding: 0 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  /* Visible only when the row is hovered/focused, to keep the list quiet. */
+  opacity: 0;
+}
+.upload-preview__row:hover .upload-preview__act,
+.upload-preview__act:focus-visible {
+  opacity: 1;
+}
+.upload-preview__act:hover {
+  color: var(--accent);
+}
+.upload-preview__act--danger:hover {
+  color: #b42318;
+}
+.warnings {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  background: #fff8e6;
+  border: 1px solid #f0d98c;
+  border-radius: var(--r-md);
+  list-style: none;
+  font-size: 0.88rem;
+}
+.warnings li {
+  margin: 0.15rem 0;
+}
+
+/* Match */
+/* One-row control bar: run button + status (badges or progress) + summary.
+   Fixed min-height so swapping badges/progress never shifts the board. */
+.match-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-height: 44px;
+  margin-bottom: 0.75rem;
+}
+/* Input summary, snug under the intro (pulled up past the header's margin). */
+.match-count {
+  margin: -0.65rem 0 0.85rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+/* Pre-run empty state: an inviting centered hero instead of a lone button. */
+.match-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.25rem 1rem 1.5rem;
+  animation: rise-in 0.3s ease backwards;
+}
+.match-hero__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.match-hero__art {
+  width: 220px;
+  height: 120px;
+  margin-bottom: 0.75rem;
+}
+.match-hero__title {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+}
+.match-hero__sub {
+  margin: 0 0 1.4rem;
+  max-width: 480px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.match-progress {
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+}
+.match-progress__label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+.progressbar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.progressbar__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+.match-error {
+  color: #c00;
+}
+.match-stats {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background: var(--accent-weak);
+  color: var(--accent);
+  cursor: help;
+}
+.badge--ok {
+  background: #e3f6e8;
+  color: #1a7f37;
+}
+.badge--warn {
+  background: #fdeaea;
+  color: #c0392b;
+}
+.results-table {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.results-table th,
+.results-table td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.results-table th {
+  background: var(--bg);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.results-table__title {
+  font-size: 0.82rem;
+  color: var(--muted);
+  max-width: 32ch;
+}
+.muted {
+  color: var(--muted);
+}
+
+/* Import wizard */
+.import__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+/* Generous click-or-drop zone: button with the drop hint pinned beneath it. */
+.import__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+  padding: 1.5rem 1rem;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.import__drop:hover {
+  border-color: var(--accent);
+}
+.import__drop--over {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+/* The zone owns the dashed affordance; the inner button reads as solid. */
+.import__drop .btn--file {
+  border-style: solid;
+  pointer-events: none;
+}
+.import__drophint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.import__headertoggle {
+  display: inline-block;
+  margin: 0.75rem 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.import__req {
+  color: #c0392b;
+}
+.import__skipnote {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-right: auto;
+}
+/* Pre-file column guide: what each column should contain. */
+.import__guide {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+}
+.import__guide summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+.import__guide ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.import__guide li {
+  margin: 0.3rem 0;
+}
+.import__guide strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.import__guide-example {
+  color: var(--muted);
+  font-style: italic;
+}
+/* Post-load status line on the card: file summary + reopen the review. */
+.import__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* Review & import modal */
+.review__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.6rem 0.9rem;
+  margin: 0.5rem 0 0.9rem;
+}
+.review__field label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.review__fieldlabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.review__field select {
+  padding: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 0.82rem;
+  width: 100%;
+}
+.review__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.review__tablenote {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+}
+.review__tablewrap {
+  overflow: auto;
+  max-height: 38vh;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.review__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.review__table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  text-align: left;
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.review__table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+  min-width: 9ch;
+}
+.review__rownum {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: right;
+  padding: 0.3rem 0.4rem !important;
+  width: 1%;
+}
+.review__unmapped {
+  color: var(--border);
+  text-align: center;
+}
+.review__unmappedtag {
+  font-weight: 400;
+  color: var(--muted);
+  font-style: italic;
+}
+/* Cells are inputs that look like cells until focused. */
+.review__cell {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  min-width: 9ch;
+}
+.review__cell:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--accent);
+  background: var(--accent-weak);
+}
+/* Pre-import warnings: count expands in place to the actual messages. */
+.import__warnings {
+  margin-top: 0.5rem;
+}
+.import__warncount {
+  font-size: 0.82rem;
+  color: #b8860b;
+  cursor: pointer;
+  font-weight: 600;
+}
+.import__warnings ul {
+  margin: 0.35rem 0 0;
+  padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+  background: #fff8e6;
+  border: 1px solid #f0d98c;
+  border-radius: var(--r-sm);
+  font-size: 0.82rem;
+}
+.import__warnings li {
+  margin: 0.15rem 0;
+}
+details.warnings summary {
+  cursor: pointer;
+  font-weight: 600;
+}

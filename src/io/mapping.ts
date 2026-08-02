@@ -179,12 +179,18 @@ export function buildReviewers(
 ): { rows: Reviewer[]; warnings: string[] } {
   const warnings: string[] = []
   const out: Reviewer[] = []
+  const seen = new Set<string>()
   rows.forEach((row, i) => {
     const id = cell(row, mapping.id)
     if (!id) {
       warnings.push(`Reviewer row ${i + 1} has no id, skipped.`)
       return
     }
+    if (seen.has(id.toLowerCase())) {
+      warnings.push(`Duplicate reviewer id "${id}" (row ${i + 1}) — kept the first, skipped this one.`)
+      return
+    }
+    seen.add(id.toLowerCase())
     const name = cell(row, mapping.name) || id
     // Combine the primary criteria column with an optional second (e.g.
     // publications) for a richer matching signal.
@@ -209,12 +215,18 @@ export function buildPapers(
 ): { rows: Paper[]; warnings: string[] } {
   const warnings: string[] = []
   const out: Paper[] = []
+  const seen = new Set<string>()
   rows.forEach((row, i) => {
     const id = cell(row, mapping.id)
     if (!id) {
       warnings.push(`Paper row ${i + 1} has no id, skipped.`)
       return
     }
+    if (seen.has(id.toLowerCase())) {
+      warnings.push(`Duplicate paper id "${id}" (row ${i + 1}) — kept the first, skipped this one.`)
+      return
+    }
+    seen.add(id.toLowerCase())
     const title = cell(row, mapping.title)
     const abstract = cell(row, mapping.abstract)
     const keywords = cell(row, mapping.keywords)

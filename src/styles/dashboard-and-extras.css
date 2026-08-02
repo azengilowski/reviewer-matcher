@@ -1,0 +1,452 @@
+/* Dashboard */
+/* "Needs attention": actionable outliers at the top of the review page. */
+/* Reviewer workload view (Review → Workload tab). */
+.workload-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.workload-toolbar .board-search {
+  flex: 1 1 220px;
+  max-width: 320px;
+}
+.workload-toolbar__counts {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 0.82rem;
+}
+.workload-count {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2, #eef0f4);
+}
+.workload-count--over {
+  background: #fde8e8;
+  color: #b42318;
+}
+.workload-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.workload-row {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  padding: 0.7rem 0.85rem;
+}
+.workload-row--over {
+  border-color: #f1b0b0;
+  background: #fef7f7;
+}
+.workload-row--idle {
+  border-style: dashed;
+}
+.workload-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.workload-row__name {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.workload-row__name:hover {
+  text-decoration: underline;
+}
+.workload-row__role {
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+.workload-row__load {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.workload-row__load--over {
+  color: #b42318;
+}
+.workload-row__papers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+.workload-row__none {
+  font-size: 0.82rem;
+  font-style: italic;
+}
+.workload-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-weak);
+  color: var(--accent-strong);
+  text-decoration: none;
+  font-size: 0.82rem;
+}
+.workload-pill:hover {
+  background: #dbe6fd;
+}
+.workload-pill__id {
+  font-weight: 600;
+  flex: none;
+}
+.workload-pill__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 22ch;
+}
+.workload-pill__score {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.attention {
+  margin-bottom: 1rem;
+}
+.attention__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.attention__head .chart-card__title {
+  margin: 0;
+}
+.attention__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #fdeaea;
+  color: #c0392b;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.attention__clear {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.attention__clear svg {
+  flex-shrink: 0;
+}
+.attention__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.attention__grouphead {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+.attention__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.attention__dot--warn {
+  background: #e0a800;
+}
+.attention__dot--danger {
+  background: #c0392b;
+}
+.attention__dot--muted {
+  background: var(--muted);
+}
+.attention__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.attention__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.attention__pill:hover {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+.attention__pill--warn {
+  border-color: #f0d98c;
+  background: #fff8e6;
+}
+.attention__pill--danger {
+  border-color: #efb9b3;
+  background: #fdeaea;
+}
+.attention__pillsub {
+  font-weight: 700;
+  font-size: 0.74rem;
+  opacity: 0.85;
+}
+
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.7rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+}
+.tile--warn {
+  border-color: #f0c36d;
+  background: #fff8e6;
+}
+.tile__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.tile__label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.85rem 1rem;
+}
+/* A chart card used as a standalone block (not inside a grid) needs the same
+   vertical rhythm as the grids around it. */
+.screen > .chart-card {
+  margin-bottom: 1rem;
+}
+.chart-card__title {
+  margin: 0 0 0.6rem;
+  font-size: 0.92rem;
+}
+.barchart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.barchart__row {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr 1.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+.barchart__label {
+  color: var(--muted);
+  text-align: right;
+}
+.barchart__track {
+  background: var(--bg);
+  border-radius: var(--r-sm);
+  height: 0.9rem;
+  overflow: hidden;
+}
+.barchart__fill {
+  background: var(--accent);
+  height: 100%;
+  min-width: 2px;
+}
+.barchart__count {
+  color: var(--muted);
+}
+.pairlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.83rem;
+}
+.pairlist li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.pairlist__score {
+  color: var(--muted);
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.compare-table th,
+.compare-table td {
+  text-align: left;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th {
+  color: var(--muted);
+}
+
+/* Project bar */
+.rule {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0 1rem;
+}
+.upload-section {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+.upload-section__hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  max-width: 65ch;
+}
+.projectbar {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0.4rem;
+  margin: -0.4rem;
+  border-radius: var(--r-md);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.projectbar--dragover {
+  background: var(--accent-weak);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.projectbar__msg {
+  width: 100%;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}
+.projectbar__report {
+  width: 100%;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.5rem;
+}
+code {
+  background: var(--bg);
+  padding: 0.05rem 0.3rem;
+  border-radius: var(--r-sm);
+  font-size: 0.85em;
+}
+
+/* Entry motion: board chips cascade in, dashboard bars grow, tiles rise.
+   All disabled by the global prefers-reduced-motion rule. */
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+.col .card {
+  animation: chip-in 0.3s ease backwards;
+}
+.col .card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.col .card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.col .card:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.col .card:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.col .card:nth-child(n + 6) {
+  animation-delay: 0.25s;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.barchart__fill {
+  transform-origin: left;
+  animation: bar-grow 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.barchart__row:nth-child(2) .barchart__fill {
+  animation-delay: 0.07s;
+}
+.barchart__row:nth-child(3) .barchart__fill {
+  animation-delay: 0.14s;
+}
+.barchart__row:nth-child(4) .barchart__fill {
+  animation-delay: 0.21s;
+}
+.barchart__row:nth-child(n + 5) .barchart__fill {
+  animation-delay: 0.28s;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.stat-tiles,
+.chart-grid,
+.chart-card {
+  animation: rise-in 0.3s ease backwards;
+}
+
+/* Compact empty state: illustration + one line + optional CTA. */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.25rem 1rem 1.5rem;
+  animation: rise-in 0.3s ease backwards;
+}
+.empty__art {
+  width: 160px;
+  height: 96px;
+  margin-bottom: 0.5rem;
+}
+.empty__text {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}

@@ -26,6 +26,7 @@ import { fmtScore } from '../domain/format'
 import { HoverCardPortal, PaperHoverBody, ReviewerHoverBody, useHoverPopover } from './HoverCard'
 import { useApp } from '../state/AppStore'
 import { Toast, useToast } from './Toast'
+import { useModalKeys } from './useModal'
 
 const UNASSIGNED = 'unassigned'
 
@@ -63,6 +64,8 @@ export function BoardView({ run }: { run: MatchRun }) {
     [reviewers, assignments, settings],
   )
   const lockedSet = useMemo(() => new Set(lockedPapers), [lockedPapers])
+  // Weak-match floor from Configure; drives the chip colors and the legend.
+  const weakScore = settings.weakThreshold ?? 0.4
   const [filter, setFilter] = useState<PaperFilter>('all')
   const [sortKey, setSortKey] = useState<SortKey>('id')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
@@ -124,6 +127,20 @@ export function BoardView({ run }: { run: MatchRun }) {
 
   // Transient toast explaining why a drop was rejected.
   const { toast, showToast } = useToast(3500)
+
+  // Cmd/Ctrl+Z undoes; +Shift redoes. Skipped while typing in a field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return
+      const t = e.target as HTMLElement | null
+      if (t && /^(input|textarea|select)$/i.test(t.tagName)) return
+      e.preventDefault()
+      if (e.shiftKey) redo()
+      else undo()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [undo, redo])
 
   function onDragStart(event: DragStartEvent) {
     const { reviewerId } = parseDrag(String(event.active.id))
@@ -298,13 +315,13 @@ export function BoardView({ run }: { run: MatchRun }) {
         >
           <span className="muted">Match score</span>
           <span className="score-legend__item">
-            <i className="dot dot--good" /> strong ≥0.55
+            <i className="dot dot--good" /> strong ≥{Math.max(0.55, weakScore).toFixed(2)}
           </span>
           <span className="score-legend__item">
-            <i className="dot dot--ok" /> fair ≥0.40
+            <i className="dot dot--ok" /> fair ≥{weakScore.toFixed(2)}
           </span>
           <span className="score-legend__item">
-            <i className="dot dot--weak" /> weak &lt;0.40
+            <i className="dot dot--weak" /> weak &lt;{weakScore.toFixed(2)}
           </span>
         </div>
       </div>
@@ -334,7 +351,7 @@ export function BoardView({ run }: { run: MatchRun }) {
                   </Link>
                   {score != null && (
                     <span
-                      className={`col__score col__score--${scoreTier(score)}`}
+                      className={`col__score col__score--${scoreTier(score, weakScore)}`}
                       title={`Average match score of the ${assigned.length} assigned reviewer(s): ${fmtScore(score)} on a 0–1 scale (higher is a stronger topical match)`}
                     >
                       {fmtScore(score)}
@@ -488,14 +505,7 @@ function AddReviewersModal({
     [assignments, paperId],
   )
   const [selected, setSelected] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  const modalRef = useModalKeys(onClose)
 
   function toggle(id: string) {
     setSelected((s) => {
@@ -509,6 +519,7 @@ function AddReviewersModal({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
+        ref={modalRef}
         className="modal"
         role="dialog"
         aria-modal="true"
@@ -591,10 +602,11 @@ function SortArrow({ dir }: { dir: SortDir }) {
   )
 }
 
-/** Coarse quality tier for the paper's average match score (colors the chip). */
-function scoreTier(score: number): 'good' | 'ok' | 'weak' {
-  if (score >= 0.55) return 'good'
-  if (score >= 0.4) return 'ok'
+/** Coarse quality tier for the paper's average match score (colors the chip).
+ *  The weak floor comes from the Configure "weak-match sensitivity" setting. */
+function scoreTier(score: number, weak: number): 'good' | 'ok' | 'weak' {
+  if (score >= Math.max(0.55, weak)) return 'good'
+  if (score >= weak) return 'ok'
   return 'weak'
 }
 

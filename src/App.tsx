@@ -7,6 +7,7 @@ import { Wordmark } from './screens/Logo'
 import { Stepper } from './screens/Stepper'
 import { StepFooter } from './screens/StepFooter'
 import { UpdatePrompt } from './screens/UpdatePrompt'
+import { useModalKeys } from './screens/useModal'
 import { UploadScreen } from './screens/UploadScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { MatchScreen } from './screens/MatchScreen'
@@ -100,42 +101,14 @@ function AppShell() {
       </header>
       {showHelp && <HowItWorksModal onClose={() => setShowHelp(false)} />}
       {showReset && (
-        <div className="modal-backdrop" onClick={() => setShowReset(false)}>
-          <div
-            className="modal modal--confirm"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Confirm app reset"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal__head">
-              <strong>Reset the app?</strong>
-              <button className="modal__close" onClick={() => setShowReset(false)} aria-label="Close">
-                ×
-              </button>
-            </div>
-            <p className="modal__hint">
-              This clears all uploaded reviewers and papers, the match and every edit, and restores
-              default settings. Export a <code>.matchproj</code> first if you want to keep your
-              work. This can't be undone.
-            </p>
-            <div className="modal__foot">
-              <button className="btn btn--ghost" onClick={() => setShowReset(false)}>
-                Cancel
-              </button>
-              <button
-                className="btn btn--danger"
-                onClick={() => {
-                  resetApp()
-                  setShowReset(false)
-                  navigate('/')
-                }}
-              >
-                Reset everything
-              </button>
-            </div>
-          </div>
-        </div>
+        <ResetConfirmModal
+          onClose={() => setShowReset(false)}
+          onConfirm={() => {
+            resetApp()
+            setShowReset(false)
+            navigate('/')
+          }}
+        />
       )}
       {/* Keyed on resetEpoch so a full app reset also clears screens' local UI
           state (e.g. a half-configured import wizard). */}
@@ -155,6 +128,44 @@ function AppShell() {
       </main>
       <StepFooter />
       <UpdatePrompt />
+    </div>
+  )
+}
+
+/** Confirm dialog for the full app reset (own component so modal keyboard
+ *  handling mounts with it). */
+function ResetConfirmModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: () => void }) {
+  const modalRef = useModalKeys(onClose)
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div
+        ref={modalRef}
+        className="modal modal--confirm"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Confirm app reset"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal__head">
+          <strong>Reset the app?</strong>
+          <button className="modal__close" onClick={onClose} aria-label="Close">
+            ×
+          </button>
+        </div>
+        <p className="modal__hint">
+          This clears all uploaded reviewers and papers, the match and every edit, and restores
+          default settings. Export a <code>.matchproj</code> first if you want to keep your work.
+          This can't be undone.
+        </p>
+        <div className="modal__foot">
+          <button className="btn btn--ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn btn--danger" onClick={onConfirm}>
+            Reset everything
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

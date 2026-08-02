@@ -1,0 +1,237 @@
+/* Home / landing */
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* Fill the scrollable main so the content sits vertically centred; still
+     scrolls if it ever outgrows the viewport. One uniform gap between the
+     logo, title, tagline, buttons, and feature list. */
+  min-height: 100%;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+  animation: rise-in 0.3s ease backwards;
+}
+.home__title {
+  margin: 0;
+  font-size: clamp(2.5rem, 7.5vw, 4rem);
+  line-height: 1.05;
+}
+.home__tagline {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.home__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.home__points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.home__points li {
+  /* Center the icon against the text line rather than sitting it on the
+     baseline, so every row reads as one vertically-centred unit. */
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.6rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: left;
+}
+.home__pointicon {
+  display: block;
+  flex-shrink: 0;
+}
+.home__points strong {
+  color: var(--text);
+  /* Medium, not full bold: emphasis without the chunky weight. */
+  font-weight: 500;
+}
+.home__points svg {
+  flex-shrink: 0;
+}
+
+/* Every step screen fades up on entry, matching the home and empty states. */
+.screen {
+  animation: rise-in 0.3s ease backwards;
+}
+
+/* Compact screen header: title (with optional sub-nav on its row), subtext
+   directly under it, tight margins throughout. */
+.screen__head {
+  margin-bottom: 0.9rem;
+}
+/* Fixed row height so the title sits the same distance below the app header on
+   every screen, whether or not a (taller) sub-nav shares its row. */
+.screen__titlerow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  min-height: 36px;
+}
+.screen__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-family: var(--font-display);
+  line-height: 1.2;
+}
+.screen__intro {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  max-width: 72ch;
+}
+.screen__nav {
+  margin-left: auto;
+}
+
+.debug-table {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.debug-table th,
+.debug-table td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.debug-table th {
+  background: var(--bg);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.debug-chip {
+  display: inline-block;
+  background: var(--accent-weak);
+  border-radius: var(--r-sm);
+  padding: 0.15rem 0.5rem;
+  margin: 0 0.3rem 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.debug-chip em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.8rem;
+}
+
+/* Buttons — one control height per tier for alignment.
+   Primary actions: 36px · utility controls: 30px · badges: 26px. */
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 36px;
+  padding: 0 0.95rem;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--r-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+.btn:hover:not(:disabled) {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn--ghost {
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 500;
+}
+.btn--ghost:hover:not(:disabled),
+.btn--file:hover:not(:disabled) {
+  background: var(--accent-weak);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+/* Hero buttons: one filled primary (Continue) + one quiet outline secondary
+   (How it works), so they read as a natural pair instead of two solid blobs. */
+.home__cta,
+.btn--howto {
+  height: 44px;
+  padding: 0 1.5rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+}
+.btn--howto {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+  font-weight: 500;
+}
+.btn--howto:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--muted);
+  color: var(--text);
+}
+/* Destructive confirmation actions. */
+.btn--danger {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+.btn--danger:hover:not(:disabled) {
+  background: #a93226;
+  border-color: #a93226;
+}
+/* Smaller tier for utility controls (undo/redo). */
+/* Compact secondary buttons (undo/redo, reset, review). Same 36px height as
+   every other button — just tighter padding and lighter text. */
+.btn--sm {
+  padding: 0 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.btn--file {
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 500;
+  border: 1px dashed var(--accent);
+}
+.upload-card__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}

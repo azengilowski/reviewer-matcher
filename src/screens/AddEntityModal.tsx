@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useModalKeys } from './useModal'
 import type { ColumnMapping, FieldSpec } from '../io/mapping'
 
 interface AddEntityModalProps<T> {
@@ -13,6 +14,10 @@ interface AddEntityModalProps<T> {
   build: (rows: string[][], mapping: ColumnMapping) => { rows: T[]; warnings: string[] }
   onAdd: (row: T) => void
   onClose: () => void
+  /** Shown as a caution banner (e.g. "adding will clear the current match"). */
+  warning?: string
+  /** Edit mode: prefill with this item's values; its own id stays allowed. */
+  initial?: Record<string, string>
 }
 
 /** Next unused id like "R9": the highest existing <prefix><n> plus one. */
@@ -40,14 +45,27 @@ export function AddEntityModal<T>({
   build,
   onAdd,
   onClose,
+  warning,
+  initial,
 }: AddEntityModalProps<T>) {
-  const existing = useMemo(() => new Set(existingIds.map((i) => i.toLowerCase())), [existingIds])
-  const [values, setValues] = useState<Record<string, string>>(() => ({
-    id: suggestId(existingIds, idPrefix),
-  }))
+  const editing = initial != null
+  // In edit mode the item's own id doesn't count as a collision.
+  const existing = useMemo(
+    () =>
+      new Set(
+        existingIds
+          .filter((i) => !(editing && i.toLowerCase() === initial.id?.toLowerCase()))
+          .map((i) => i.toLowerCase()),
+      ),
+    [existingIds, editing, initial],
+  )
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    initial ?? { id: suggestId(existingIds, idPrefix) },
+  )
   const [error, setError] = useState<string | null>(null)
 
   const set = (key: string, v: string) => setValues((prev) => ({ ...prev, [key]: v }))
+  const modalRef = useModalKeys(onClose)
 
   function submit() {
     const id = (values.id ?? '').trim()
@@ -77,19 +95,21 @@ export function AddEntityModal<T>({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
+        ref={modalRef}
         className="modal"
         role="dialog"
         aria-modal="true"
-        aria-label={`Add ${noun}`}
+        aria-label={editing ? `Edit ${noun}` : `Add ${noun}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal__head">
-          <strong>Add {noun}</strong>
+          <strong>{editing ? `Edit ${noun}` : `Add ${noun}`}</strong>
           <button className="modal__close" onClick={onClose} aria-label="Close">
             ×
           </button>
         </div>
         <div className="modal__body">
+          {warning && <p className="add-form__warning">⚠️ {warning}</p>}
           <form
             className="add-form"
             onSubmit={(e) => {
@@ -132,7 +152,7 @@ export function AddEntityModal<T>({
             Cancel
           </button>
           <button className="btn" onClick={submit}>
-            Add {noun}
+            {editing ? 'Save changes' : `Add ${noun}`}
           </button>
         </div>
       </div>
