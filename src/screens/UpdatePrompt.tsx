@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
 /** How often an open tab looks for a newer deploy. */
@@ -13,6 +14,7 @@ const CHECK_INTERVAL_MS = 60 * 60 * 1000
  * an hourly timer and whenever the tab regains visibility.
  */
 export function UpdatePrompt() {
+  const refreshing = useRef(false)
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -20,7 +22,10 @@ export function UpdatePrompt() {
     onRegisteredSW(swUrl, registration) {
       if (!registration) return
       const check = async () => {
-        if (registration.installing || !navigator.onLine) return
+        // Skip while an install is in flight or an update is already staged —
+        // re-updating then can momentarily clear `waiting` and swallow a
+        // Refresh click.
+        if (registration.installing || registration.waiting || !navigator.onLine) return
         try {
           // Probe the SW file first (cache-bypassed) so update() isn't called
           // while offline or when the server is unreachable.
@@ -37,13 +42,23 @@ export function UpdatePrompt() {
     },
   })
 
+  function refresh() {
+    if (refreshing.current) return
+    refreshing.current = true
+    void updateServiceWorker(true)
+    // updateServiceWorker reloads once the new worker takes control; if that
+    // signal is missed (e.g. the waiting worker changed underneath the click),
+    // fall back to a plain reload so the button always visibly acts.
+    setTimeout(() => window.location.reload(), 4000)
+  }
+
   if (!needRefresh) return null
 
   return (
     <div className="update-toast" role="status" aria-live="polite">
       <span>A new version of Peerfect Match is available.</span>
       <div className="update-toast__actions">
-        <button className="btn btn--sm" onClick={() => updateServiceWorker(true)}>
+        <button className="btn btn--sm" onClick={refresh}>
           Refresh
         </button>
         <button
