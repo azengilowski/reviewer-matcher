@@ -6,6 +6,7 @@ import { fmtScore } from '../domain/format'
 import type { Paper, Reviewer } from '../domain/types'
 import {
   averagePaperScore,
+  paperRoleStatus,
   papersForReviewer,
   reviewerLoadStatus,
 } from '../editing/validation'
@@ -32,7 +33,17 @@ export function DashboardScreen() {
       used: assignments.filter((a) => a.paperId === p.id).length,
       score: averagePaperScore(run, assignments, p.id),
     }))
+    const reviewerMap = new Map(reviewers.map((r) => [r.id, r]))
+    const roleGaps = papers
+      .map((p) => ({
+        p,
+        gaps: paperRoleStatus(assignments, p.id, reviewerMap, settings).filter(
+          (g) => g.have < g.min,
+        ),
+      }))
+      .filter((x) => x.gaps.length > 0)
     return {
+      roleGaps,
       unfilled: paperInfo.filter((x) => x.used < x.cap),
       overCap: paperInfo.filter((x) => x.used > x.cap),
       weak: paperInfo.filter((x) => x.used > 0 && x.score != null && x.score < weakScore),
@@ -162,6 +173,7 @@ export function DashboardScreen() {
 
 type PaperInfo = { p: Paper; cap: number; used: number; score: number | null }
 type Attn = {
+  roleGaps: { p: Paper; gaps: { role: string; min: number; have: number }[] }[]
   unfilled: PaperInfo[]
   overCap: PaperInfo[]
   weak: PaperInfo[]
@@ -176,7 +188,12 @@ const reviewerLink = (id: string) => `/details?mode=reviewer&id=${encodeURICompo
 /** Actionable outliers, each linking to its Details view to investigate/fix. */
 function NeedsAttention({ a }: { a: Attn }) {
   const total =
-    a.unfilled.length + a.overCap.length + a.weak.length + a.overloaded.length + a.idle.length
+    a.unfilled.length +
+    a.overCap.length +
+    a.weak.length +
+    a.overloaded.length +
+    a.idle.length +
+    a.roleGaps.length
   return (
     <section className="attention chart-card">
       <div className="attention__head">
@@ -190,6 +207,20 @@ function NeedsAttention({ a }: { a: Attn }) {
         </p>
       ) : (
         <div className="attention__groups">
+          <AttentionGroup
+            tone="warn"
+            title="Role minimums unmet"
+            hint="papers short of a required role"
+            items={a.roleGaps.map((x) => ({
+              id: x.p.id,
+              label: x.p.id,
+              sub: x.gaps.map((g) => `${g.have}/${g.min} ${g.role}`).join(' · '),
+              title: `${x.p.title || x.p.id} — ${x.gaps
+                .map((g) => `has ${g.have} of ${g.min} required ${g.role} reviewer(s)`)
+                .join('; ')}`,
+              to: paperLink(x.p.id),
+            }))}
+          />
           <AttentionGroup
             tone="warn"
             title="Papers unfilled"

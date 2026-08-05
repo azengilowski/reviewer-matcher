@@ -126,3 +126,56 @@ describe('runMatch', () => {
     expect(asReviewers.stable).toBe(true)
   })
 })
+
+describe('runMatch role minimums', () => {
+  // One paper about literacy; the two students are much better topical matches,
+  // but the professors are guaranteed their reserved seats.
+  const paps: Paper[] = [
+    { id: 'p1', title: 'Reading', abstract: 'literacy reading equity classrooms', keywords: 'literacy reading', method: '', authors: 'Nobody' },
+  ]
+  const revs: Reviewer[] = [
+    { id: 's1', name: 'Stud One', role: 'student', criteria: 'literacy reading equity classrooms' },
+    { id: 's2', name: 'Stud Two', role: 'student', criteria: 'literacy reading classrooms' },
+    { id: 'f1', name: 'Prof One', role: 'professor', criteria: 'mathematics cognition' },
+    { id: 'f2', name: 'Prof Two', role: 'professor', criteria: 'science inquiry' },
+  ]
+  const roleOf = new Map(revs.map((r) => [r.id, r.role]))
+
+  it('guarantees the minimum professors even when students score higher', async () => {
+    const run = await runMatch(
+      revs,
+      paps,
+      { ...DEFAULT_SETTINGS, paperCapacity: 3, roleMinimums: { professor: 2 } },
+      keywordProvider,
+    )
+    const held = run.assignments.filter((a) => a.paperId === 'p1').map((a) => a.reviewerId)
+    expect(held).toHaveLength(3)
+    expect(held.filter((id) => roleOf.get(id) === 'professor')).toHaveLength(2)
+    expect(held).toContain('s1') // the best student takes the open seat
+  })
+
+  it('fills with best available when the reserved role runs short', async () => {
+    const run = await runMatch(
+      revs,
+      paps,
+      { ...DEFAULT_SETTINGS, paperCapacity: 3, roleMinimums: { professor: 3 } },
+      keywordProvider,
+    )
+    const held = run.assignments.filter((a) => a.paperId === 'p1').map((a) => a.reviewerId)
+    // Only 2 professors exist: both seated, third seat reverts to the best student.
+    expect(held).toHaveLength(3)
+    expect(held.filter((id) => roleOf.get(id) === 'professor')).toHaveLength(2)
+    expect(held.filter((id) => roleOf.get(id) === 'student')).toHaveLength(1)
+  })
+
+  it('with no minimums the best matches win regardless of role', async () => {
+    const run = await runMatch(
+      revs,
+      paps,
+      { ...DEFAULT_SETTINGS, paperCapacity: 2, roleMinimums: {} },
+      keywordProvider,
+    )
+    const held = run.assignments.filter((a) => a.paperId === 'p1').map((a) => a.reviewerId)
+    expect(held.sort()).toEqual(['s1', 's2'])
+  })
+})

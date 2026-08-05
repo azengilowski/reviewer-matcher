@@ -1,4 +1,4 @@
-import { capacityForPaper, loadForReviewer } from '../domain/settings'
+import { activeRoleMinimums, capacityForPaper, loadForReviewer } from '../domain/settings'
 import type {
   Assignment,
   MatchRun,
@@ -66,6 +66,28 @@ export function averagePaperScore(
     .map((a) => scoreById.get(a.reviewerId) ?? 0)
   if (scores.length === 0) return null
   return scores.reduce((sum, s) => sum + s, 0) / scores.length
+}
+
+/**
+ * Per-role status of a paper's panel against the configured role minimums:
+ * one entry per role with a minimum, with how many seats it actually holds.
+ */
+export function paperRoleStatus(
+  assignments: Assignment[],
+  paperId: string,
+  reviewers: Map<string, Reviewer>,
+  settings: MatchSettings,
+): { role: string; min: number; have: number }[] {
+  const minimums = activeRoleMinimums(settings)
+  const roles = Object.keys(minimums).sort()
+  if (roles.length === 0) return []
+  const counts = new Map<string, number>()
+  for (const a of assignments) {
+    if (a.paperId !== paperId) continue
+    const role = reviewers.get(a.reviewerId)?.role
+    if (role) counts.set(role, (counts.get(role) ?? 0) + 1)
+  }
+  return roles.map((role) => ({ role, min: minimums[role], have: counts.get(role) ?? 0 }))
 }
 
 /** Rank of a reviewer within a paper's preference list (0 if absent). */

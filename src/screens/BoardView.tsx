@@ -18,6 +18,7 @@ import { addReviewersToPaper, computeMove } from '../editing/moves'
 import {
   averagePaperScore,
   paperCapacityStatus,
+  paperRoleStatus,
   papersForReviewer,
   reviewerLoadStatus,
 } from '../editing/validation'
@@ -338,6 +339,8 @@ export function BoardView({ run }: { run: MatchRun }) {
           const assigned = assignments.filter((a) => a.paperId === paper.id)
           const locked = lockedSet.has(paper.id)
           const score = averagePaperScore(run, assignments, paper.id)
+          const roleShortfalls = paperRoleStatus(assignments, paper.id, reviewerById, settings)
+            .filter((r) => r.have < r.min)
           return (
             <Column key={paper.id} id={paper.id} over={status.over} locked={locked}>
               <div className="col__head">
@@ -355,6 +358,16 @@ export function BoardView({ run }: { run: MatchRun }) {
                       title={`Average match score of the ${assigned.length} assigned reviewer(s): ${fmtScore(score)} on a 0–1 scale (higher is a stronger topical match)`}
                     >
                       {fmtScore(score)}
+                    </span>
+                  )}
+                  {roleShortfalls.length > 0 && (
+                    <span
+                      className="col__rolegap"
+                      title={roleShortfalls
+                        .map((r) => `Has ${r.have} of the ${r.min} required ${r.role} reviewer(s)`)
+                        .join('. ')}
+                    >
+                      {roleShortfalls.map((r) => `${r.min - r.have} ${r.role} short`).join(' · ')}
                     </span>
                   )}
                 </span>

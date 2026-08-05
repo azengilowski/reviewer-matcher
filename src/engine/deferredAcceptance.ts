@@ -27,6 +27,44 @@ function rankIndex(parties: Party[]): Map<string, Map<string, number>> {
 }
 
 /**
+ * A receiver's choice over a candidate set, honoring per-group reserves
+ * (minority-reserve semantics): first each group's best candidates take up to
+ * that group's reserved seats, then the best remaining candidates of any group
+ * fill the open seats. A reserve without enough candidates simply frees its
+ * seats — nothing is held empty. With no reserves this reduces to "keep the
+ * top `capacity`".
+ */
+function chooseHeld(
+  receiver: Party,
+  held: Iterable<string>,
+  rank: Map<string, number>,
+  groupOf: Map<string, string | undefined>,
+): { keep: Set<string>; reject: string[] } {
+  const sorted = [...held].sort((a, b) => rank.get(a)! - rank.get(b)!)
+  const keep = new Set<string>()
+  const reserves = receiver.reserves
+  if (reserves) {
+    // Deterministic group order; stop when capacity is exhausted (defensive:
+    // upstream validates that reserves fit within capacity).
+    for (const g of Object.keys(reserves).sort()) {
+      let seats = reserves[g]
+      for (const c of sorted) {
+        if (seats <= 0 || keep.size >= receiver.capacity) break
+        if (!keep.has(c) && groupOf.get(c) === g) {
+          keep.add(c)
+          seats--
+        }
+      }
+    }
+  }
+  for (const c of sorted) {
+    if (keep.size >= receiver.capacity) break
+    keep.add(c)
+  }
+  return { keep, reject: sorted.filter((c) => !keep.has(c)) }
+}
+
+/**
  * Many-to-many deferred acceptance (Gale–Shapley / generalized
  * Hospital–Residents), proposer-proposing. Ported from `paper_matcher.py`.
  *
@@ -49,6 +87,7 @@ export function deferredAcceptance(
   const receiverById = new Map(receivers.map((r) => [r.id, r]))
   const receiverRank = rankIndex(receivers)
   const proposerRank = rankIndex(proposers)
+  const groupOf = new Map(proposers.map((p) => [p.id, p.group]))
 
   // Mutable state.
   const holds = new Map<string, Set<string>>() // receiverId -> held proposerIds
@@ -87,13 +126,11 @@ export function deferredAcceptance(
         holds.get(rid)!.add(pid)
         matched.get(pid)!.add(rid)
 
-        // Reject the least-preferred if now over capacity.
-        if (holds.get(rid)!.size > r.capacity) {
-          const held = [...holds.get(rid)!].sort(
-            (a, b) => rRank.get(a)! - rRank.get(b)!,
-          )
-          for (const rejected of held.slice(r.capacity)) {
-            holds.get(rid)!.delete(rejected)
+        // Keep the receiver's chosen set (reserves-aware) and reject the rest.
+        if (holds.get(rid)!.size > r.capacity || r.reserves) {
+          const { keep, reject } = chooseHeld(r, holds.get(rid)!, rRank, groupOf)
+          holds.set(rid, keep)
+          for (const rejected of reject) {
             matched.get(rejected)!.delete(rid)
             const rp = proposerById.get(rejected)!
             if (isActive(rp)) requeue.add(rejected) // freed → may propose again
@@ -165,6 +202,9 @@ export function verifyStable(
   const proposerCap = new Map(proposers.map((p) => [p.id, p.capacity]))
   const receiverCap = new Map(receivers.map((r) => [r.id, r.capacity]))
 
+  const groupOf = new Map(proposers.map((p) => [p.id, p.group]))
+  const receiverById = new Map(receivers.map((r) => [r.id, r]))
+
   for (const p of proposers) {
     const pMatches = result.byProposer.get(p.id) ?? []
     const pRank = proposerRank.get(p.id)!
@@ -180,9 +220,14 @@ export function verifyStable(
       if (!pWants) continue
 
       const rMatches = result.byReceiver.get(r.id) ?? []
-      const rWants =
-        rMatches.length < receiverCap.get(r.id)! ||
-        rMatches.some((m) => rRank.get(p.id)! < rRank.get(m)!)
+      // The receiver wants p if its choice over current partners plus p would
+      // include p — this generalizes the capacity/rank test to reserves (a
+      // reserved-group candidate can displace a higher-ranked open-seat holder
+      // when their group is under its minimum).
+      const rWants = receiverById.get(r.id)!.reserves
+        ? chooseHeld(receiverById.get(r.id)!, [...rMatches, p.id], rRank, groupOf).keep.has(p.id)
+        : rMatches.length < receiverCap.get(r.id)! ||
+          rMatches.some((m) => rRank.get(p.id)! < rRank.get(m)!)
       if (rWants) return { stable: false, blockingPair: [p.id, r.id] }
     }
   }

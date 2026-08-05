@@ -37,6 +37,12 @@ export interface MatchSettings {
   excludeSameInstitution?: boolean
   /** Average-similarity floor under which a paper counts as a weak match. */
   weakThreshold?: number
+  /**
+   * Minimum reviewers of a given role per paper ("at least 3 professors").
+   * Reserved seats fall back to best-available when a role runs short; roles
+   * absent from the map have no minimum. Empty/undefined = off.
+   */
+  roleMinimums?: Record<string, number>
   /** Which side proposes — determines who is advantaged (SPEC §4.2–4.3). */
   proposingSide: 'papers' | 'reviewers'
   /** Reproducibility seed (SPEC §8). */

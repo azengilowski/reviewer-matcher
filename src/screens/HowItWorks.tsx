@@ -77,7 +77,10 @@ export function HowItWorksModal({ onClose }: { onClose: () => void }) {
               Now the app plays matchmaker. Every paper has a wish-list of reviewers (closest topics
               first), and every reviewer has a wish-list of papers. It works through those lists to
               pair everyone up as well as possible, filling each paper up to its reviewer limit and
-              keeping each reviewer's workload sensible. The result is <em>stable</em>: there's no
+              keeping each reviewer's workload sensible. Role minimums from Configure are honored
+              as reserved seats — "at least 3 professors" means the best professors take those
+              seats even when others score higher, falling back to the best available if a role
+              runs short. The result is <em>stable</em>: there's no
               paper-and-reviewer pair who'd both secretly rather have been matched with each other.
               And nobody is ever handed their own paper to review. You hold the dials: capacities,
               workloads, and more all live in the Configure step.

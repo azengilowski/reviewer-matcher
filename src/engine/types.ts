@@ -16,6 +16,16 @@ export interface Party {
   preferences: string[]
   /** Max partners this party can hold (paper capacity or reviewer load). */
   capacity: number
+  /** Optional group label (e.g. a reviewer's role), read by receivers' reserves. */
+  group?: string
+  /**
+   * Receiver-side only: minimum seats reserved per proposer group ("at least
+   * 3 professors"). Soft in the minority-reserve sense: while candidates of a
+   * group exist they are guaranteed up to that many seats even when others
+   * score higher, but a reserve that can't be filled reverts to an open seat
+   * for the best remaining candidates — seats are never held empty.
+   */
+  reserves?: Record<string, number>
 }
 
 export interface Pair {

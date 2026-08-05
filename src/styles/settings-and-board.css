@@ -181,6 +181,11 @@
 .settings-check input[type='checkbox']:focus-visible {
   box-shadow: var(--focus-ring);
 }
+.settings-error {
+  margin: 0.35rem 0 0;
+  color: #b42318;
+  font-size: 0.85rem;
+}
 .settings-hint {
   font-size: 0.8rem;
   margin: 0.35rem 0 0;
@@ -495,6 +500,16 @@
 .col__id:hover {
   color: var(--accent);
   text-decoration: underline;
+}
+.col__rolegap {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #b45309;
+  background: #fff8e6;
+  border: 1px solid #f0d98c;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
 }
 .col__score {
   font-size: 0.72rem;

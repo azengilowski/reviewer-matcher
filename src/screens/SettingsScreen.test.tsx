@@ -39,7 +39,7 @@ describe('SettingsScreen', () => {
 
   it('edits the default paper capacity', () => {
     renderSettings()
-    const cap = screen.getByLabelText(/reviewers per paper/i)
+    const cap = screen.getByLabelText('Reviewers per paper')
     expect(cap).toHaveValue(4)
     fireEvent.change(cap, { target: { value: '3' } })
     expect(cap).toHaveValue(3)
@@ -47,7 +47,7 @@ describe('SettingsScreen', () => {
 
   it('allows clearing a number field, marking it invalid until refilled', () => {
     renderSettings()
-    const cap = screen.getByLabelText(/reviewers per paper/i)
+    const cap = screen.getByLabelText('Reviewers per paper')
     fireEvent.change(cap, { target: { value: '' } })
     expect(cap).toHaveValue(null)
     expect(cap).toHaveAttribute('aria-invalid', 'true')

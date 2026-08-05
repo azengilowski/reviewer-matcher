@@ -22,6 +22,15 @@ export function loadForReviewer(reviewer: Reviewer, settings: MatchSettings): nu
   return settings.loadsByRole[reviewer.role] ?? settings.defaultLoad
 }
 
+/** Role minimums with zero/negative entries dropped; {} when off. */
+export function activeRoleMinimums(settings: MatchSettings): Record<string, number> {
+  const out: Record<string, number> = {}
+  for (const [role, min] of Object.entries(settings.roleMinimums ?? {})) {
+    if (min > 0) out[role] = min
+  }
+  return out
+}
+
 /** Resolve a paper's capacity: per-paper override, else the global default. */
 export function capacityForPaper(paper: Paper, settings: MatchSettings): number {
   return paper.capacityOverride ?? settings.paperCapacity

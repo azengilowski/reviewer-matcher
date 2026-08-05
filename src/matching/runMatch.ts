@@ -1,7 +1,7 @@
 import { deferredAcceptance, verifyStable } from '../engine/deferredAcceptance'
 import type { Party } from '../engine/types'
 import { rebalanceLoads } from './rebalance'
-import { capacityForPaper, loadForReviewer } from '../domain/settings'
+import { activeRoleMinimums, capacityForPaper, loadForReviewer } from '../domain/settings'
 import type {
   Assignment,
   MatchRun,
@@ -141,21 +141,30 @@ export async function runMatch(
   }
 
   // 5. Build Party lists (conflicts filtered out of what the engine can match).
+  //    With role minimums, papers carry per-role reserves and reviewers carry
+  //    their role as the engine group.
+  const minimums = activeRoleMinimums(settings)
+  const hasMinimums = Object.keys(minimums).length > 0
   const paperParty: Party[] = papers
     .filter((p) => !lockedPaperIds.has(p.id))
     .map((p) => ({
       id: p.id,
       capacity: capacityForPaper(p, settings),
       preferences: paperPreferences[p.id].filter((e) => !e.conflict).map((e) => e.targetId),
+      ...(hasMinimums ? { reserves: minimums } : {}),
     }))
   const reviewerParty: Party[] = reviewers.map((r) => ({
     id: r.id,
     capacity: Math.max(0, loadForReviewer(r, settings) - (lockedLoadUsed.get(r.id) ?? 0)),
     preferences: reviewerPreferences[r.id].filter((e) => !e.conflict).map((e) => e.targetId),
+    group: r.role,
   }))
 
-  // 6. Run with the configured proposing side (SPEC §4.2).
-  const papersPropose = settings.proposingSide === 'papers'
+  // 6. Run with the configured proposing side (SPEC §4.2). Reserves are only
+  //    supported on the receiving side, so active role minimums force the
+  //    reviewers-propose direction; both sides rank by the same symmetric
+  //    score, so the direction has little practical effect on outcomes.
+  const papersPropose = settings.proposingSide === 'papers' && !hasMinimums
   const proposers = papersPropose ? paperParty : reviewerParty
   const receivers = papersPropose ? reviewerParty : paperParty
   const result = deferredAcceptance(proposers, receivers, { seed: settings.seed })
@@ -183,6 +192,7 @@ export async function runMatch(
     reviewers,
     { paperPreferences, reviewerPreferences },
     settings.minLoad ?? 0,
+    minimums,
   )
   const finalAssignments = [...lockedAssignments, ...balanced]
 

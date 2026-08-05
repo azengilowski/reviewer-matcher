@@ -15,8 +15,9 @@ cached for offline use.
   right in the app.
 - **Match** with in-browser semantic embeddings (`all-MiniLM-L6-v2` via transformers.js)
   and a many-to-many deferred-acceptance engine, with configurable capacities, per-role
-  loads, proposing side, and conflict rules (self-authorship and, optionally,
-  same-institution).
+  loads, per-role paper minimums ("at least 3 professors per paper" — reserved seats
+  fall back to best-available when a role runs short), proposing side, and conflict
+  rules (self-authorship and, optionally, same-institution).
 - **Tune** via a drag-and-drop board: add/remove/move reviewers (mouse, touch, or
   keyboard), lock finalized papers, search, sort, and filter — with live constraint
   checks, undo/redo (incl. Cmd/Ctrl+Z), and an audit log.

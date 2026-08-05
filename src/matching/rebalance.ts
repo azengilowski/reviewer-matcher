@@ -23,12 +23,26 @@ export function rebalanceLoads(
   reviewers: Reviewer[],
   prefs: Prefs,
   minLoad: number,
+  /** Per-paper role minimums a swap must not break (see MatchSettings). */
+  roleMinimums: Record<string, number> = {},
 ): Assignment[] {
   if (minLoad <= 0) return assignments
 
   const work = assignments.map((a) => ({ ...a }))
   const load = new Map<string, number>(reviewers.map((r) => [r.id, 0]))
   for (const a of work) load.set(a.reviewerId, (load.get(a.reviewerId) ?? 0) + 1)
+  const roleOf = new Map(reviewers.map((r) => [r.id, r.role]))
+
+  /** Would replacing `victim` with `needy` leave the paper under a role minimum? */
+  const breaksMinimum = (victim: Assignment, needyId: string): boolean => {
+    const victimRole = roleOf.get(victim.reviewerId) ?? ''
+    if ((roleMinimums[victimRole] ?? 0) <= 0) return false
+    if (roleOf.get(needyId) === victimRole) return false // same-role swap is safe
+    const have = work.filter(
+      (x) => x.paperId === victim.paperId && roleOf.get(x.reviewerId) === victimRole,
+    ).length
+    return have - 1 < roleMinimums[victimRole]
+  }
 
   const acceptable = (paperId: string, reviewerId: string): PreferenceEntry | null => {
     const e = entry(prefs.paperPreferences[paperId], reviewerId)
@@ -57,6 +71,7 @@ export function rebalanceLoads(
         if (work.some((x) => x.paperId === a.paperId && x.reviewerId === needy.id)) continue
         const e = acceptable(a.paperId, needy.id)
         if (!e) continue
+        if (breaksMinimum(a, needy.id)) continue
         if (e.score > bestScore) {
           bestScore = e.score
           bestIndex = index

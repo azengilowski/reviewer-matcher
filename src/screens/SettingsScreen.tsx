@@ -65,6 +65,25 @@ export function SettingsScreen() {
   function updateRoleLoad(role: string, load: number) {
     update({ loadsByRole: { ...settings.loadsByRole, [role]: load } })
   }
+  function updateRoleMinimum(role: string, min: number) {
+    update({ roleMinimums: { ...(settings.roleMinimums ?? {}), [role]: min } })
+  }
+
+  // Roles that can carry a per-paper minimum: the configured load roles plus
+  // any role present in the imported reviewer data.
+  const minimumRoles = useMemo(() => {
+    const roles = new Set(Object.keys(settings.loadsByRole))
+    for (const r of reviewers) roles.add(r.role)
+    return [...roles].sort()
+  }, [settings.loadsByRole, reviewers])
+  const minimumsSum = minimumRoles.reduce(
+    (sum, role) => sum + Math.max(0, settings.roleMinimums?.[role] ?? 0),
+    0,
+  )
+  const minimumsExceed = minimumsSum > settings.paperCapacity
+  useEffect(() => {
+    fieldValidity('roleMinimumsSum')(!minimumsExceed)
+  }, [minimumsExceed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ScreenShell
@@ -118,6 +137,36 @@ export function SettingsScreen() {
               onValidityChange={fieldValidity('defaultLoad')}
             />
           </label>
+        </div>
+
+        <div className="settings-roles">
+          <span className="settings-field__label">Minimum reviewers per paper, by role (0 = none)</span>
+          {minimumRoles.map((role) => (
+            <label key={role} className="settings-role">
+              <span>{role}</span>
+              <NumberField
+                value={settings.roleMinimums?.[role] ?? 0}
+                min={0}
+                ariaLabel={`Minimum ${role} reviewers per paper`}
+                onCommit={(n) => updateRoleMinimum(role, n)}
+                onValidityChange={fieldValidity(`roleMin:${role}`)}
+              />
+            </label>
+          ))}
+          {minimumsExceed && (
+            <p className="settings-error" role="alert">
+              Role minimums add up to {minimumsSum}, more than the paper capacity (
+              {settings.paperCapacity}). Lower them or raise the capacity.
+            </p>
+          )}
+          {minimumsSum > 0 && !minimumsExceed && (
+            <p className="settings-hint muted">
+              Each paper reserves {minimumsSum} of its {settings.paperCapacity} seats by role;
+              remaining seats go to the best match of any role. If a role runs short, its seats
+              fall back to the best available. With minimums set, reviewers become the proposing
+              side so the guarantees hold.
+            </p>
+          )}
         </div>
 
         <label className="settings-field">
